@@ -13,8 +13,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // MENAMBAHKAN TRUST PROXIES UNTUK RAILWAY/CLOUDFLARE
         $middleware->trustProxies(at: '*');
+
+        // PENGECUALIAN ROUTE LOGIN DARI CSRF (SOLUSI INSTAN)
+        $middleware->validateCsrfTokens(except: [
+            'login',
+            'http://e-arsip-production-c035.up.railway.app/login',
+            'https://e-arsip-production-c035.up.railway.app/login',
+        ]);
 
         $middleware->alias([
             'role' => RoleMiddleware::class,
