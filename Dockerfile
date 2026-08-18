@@ -38,26 +38,27 @@ RUN npm install && npm run build
 # Berikan permission untuk storage dan bootstrap/cache (Laravel)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 7. Konfigurasi Nginx (Menggunakan variabel $PORT dari Railway)
-RUN echo 'server {\n\
-    listen 8080;\n\
-    index index.php index.html;\n\
-    error_log  /var/log/nginx/error.log;\n\
-    access_log /var/log/nginx/access.log;\n\
-    root /var/www/html/public;\n\
-    location ~ \.php$ {\n\
-        try_files $uri =404;\n\
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;\n\
-        fastcgi_pass 127.0.0.1:9000;\n\
-        fastcgi_index index.php;\n\
-        include fastcgi_params;\n\
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n\
-        fastcgi_param PATH_INFO $fastcgi_path_info;\n\
-    }\n\
-    location / {\n\
-        try_files $uri $uri/ /index.php?$query_string;\n\
-        gzip_static on;\n\
-    }\n\}' > /etc/nginx/sites-available/default
+# 7. Konfigurasi Nginx
+RUN echo "server {" > /etc/nginx/sites-available/default && \
+    echo "    listen 8080;" >> /etc/nginx/sites-available/default && \
+    echo "    index index.php index.html;" >> /etc/nginx/sites-available/default && \
+    echo "    error_log  /var/log/nginx/error.log;" >> /etc/nginx/sites-available/default && \
+    echo "    access_log /var/log/nginx/access.log;" >> /etc/nginx/sites-available/default && \
+    echo "    root /var/www/html/public;" >> /etc/nginx/sites-available/default && \
+    echo "    location ~ \.php$ {" >> /etc/nginx/sites-available/default && \
+    echo "        try_files \$uri =404;" >> /etc/nginx/sites-available/default && \
+    echo "        fastcgi_split_path_info ^(.+\.php)(/.+)$; " >> /etc/nginx/sites-available/default && \
+    echo "        fastcgi_pass 127.0.0.1:9000;" >> /etc/nginx/sites-available/default && \
+    echo "        fastcgi_index index.php;" >> /etc/nginx/sites-available/default && \
+    echo "        include fastcgi_params;" >> /etc/nginx/sites-available/default && \
+    echo "        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;" >> /etc/nginx/sites-available/default && \
+    echo "        fastcgi_param PATH_INFO \$fastcgi_path_info;" >> /etc/nginx/sites-available/default && \
+    echo "    }" >> /etc/nginx/sites-available/default && \
+    echo "    location / {" >> /etc/nginx/sites-available/default && \
+    echo "        try_files \$uri \$uri/ /index.php?\$query_string;" >> /etc/nginx/sites-available/default && \
+    echo "        gzip_static on;" >> /etc/nginx/sites-available/default && \
+    echo "    }" >> /etc/nginx/sites-available/default && \
+    echo "}" >> /etc/nginx/sites-available/default
 
 # 8. Siapkan Script Startup & Permission
 COPY start.sh /start.sh
