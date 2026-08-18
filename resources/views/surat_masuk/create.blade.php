@@ -116,7 +116,7 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Scan / Lampiran <span class="text-slate-400 font-normal lowercase">(PDF / Gambar max 10MB)</span></label>
                             
-                            <!-- Ditambahkan capture="environment" & accept gambar/pdf -->
+                            <!-- Input File dengan dukungan tangkapan kamera langsung -->
                             <input type="file" name="lampiran_file" accept=".pdf,image/*" capture="environment" id="lampiranFile"
                                 class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 border border-slate-200 rounded-xl cursor-pointer bg-slate-50/50">
                             
