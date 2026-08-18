@@ -3,40 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $__env->yieldContent('title', 'Dashboard'); ?> - E-Arsip</title>
+    <title><?php echo $__env->yieldContent('title', 'Dashboard'); ?> - Arsip Surat</title>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css']); ?>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white">
 
 <div class="flex min-h-screen relative overflow-x-hidden">
-    <!-- Sidebar Left Navigation -->
+    <!-- Sidebar Left Navigation (Background Dark Navy #090d16 disesuaikan seperti Login) -->
     <aside 
         id="app-sidebar"
-        class="bg-slate-900 text-slate-300 flex flex-col fixed h-full z-30 shadow-xl border-r border-slate-800 transition-all duration-300">
+        class="bg-[#090d16] text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/60 transition-all duration-300">
         
         <!-- Brand / Logo Header Archive -->
-        <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between">
+        <div class="h-16 px-4 border-b border-slate-800/60 flex items-center justify-between">
             <div id="sidebar-brand" class="flex items-center gap-3 overflow-hidden mx-auto w-full">
                 
-                <!-- IKON LOGO E-ARSIP -->
-                <button type="button" data-sidebar-toggle class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0 focus:outline-none" title="Toggle Sidebar">
+                <!-- IKON LOGO SURAT (Pendar Biru Khas Halaman Login) -->
+                <button type="button" data-sidebar-toggle class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0 focus:outline-none" title="Toggle Sidebar">
                     <svg class="w-5 h-5 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h9a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full shadow-sm"></span>
+                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#090d16] rounded-full shadow-sm"></span>
                 </button>
                 
-                <!-- NAMA SISTEM -->
+                <!-- NAMA SISTEM (ArsipSurat) -->
                 <div class="flex flex-col whitespace-nowrap" data-sidebar-label>
-                    <span class="font-extrabold text-white text-base tracking-wider font-sans">E-ARSIP</span>
-                    <p class="text-[10px] text-slate-400 font-medium tracking-wide">Sistem manajemen arsip</p>
+                    <span class="font-bold text-white text-base tracking-tight font-sans">
+                        Arsip<span class="text-blue-500">Surat</span>
+                    </span>
+                    <p class="text-[10px] text-slate-400 font-medium tracking-wide">Sistem Informasi Persuratan</p>
                 </div>
             </div>
 
             <!-- IKON TOGGLE SIDEBAR << -->
             <button data-sidebar-label 
                     data-sidebar-collapse 
-                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition duration-150 focus:outline-none shrink-0"
+                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-lg transition duration-150 focus:outline-none shrink-0"
                     title="Mengecilkan Sidebar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
@@ -45,31 +47,31 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+        <nav class="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
             <a href="<?php echo e(route('dashboard')); ?>" 
                title="Dashboard"
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('dashboard') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 <span data-sidebar-label class="whitespace-nowrap">Dashboard</span>
             </a>
 
             <a href="<?php echo e(route('surat-masuk.index')); ?>" 
                title="Surat Masuk"
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('surat-masuk.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('surat-masuk.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
                 <span data-sidebar-label class="whitespace-nowrap">Surat Masuk</span>
             </a>
 
             <a href="<?php echo e(route('surat-keluar.index')); ?>" 
                title="Surat Keluar"
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('surat-keluar.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('surat-keluar.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                 <span data-sidebar-label class="whitespace-nowrap">Surat Keluar</span>
             </a>
 
             <a href="<?php echo e(route('disposisi.index')); ?>" 
                title="Disposisi"
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('disposisi.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
+               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('disposisi.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                 <span data-sidebar-label class="whitespace-nowrap">Disposisi</span>
             </a>
@@ -82,21 +84,21 @@
 
                 <a href="<?php echo e(route('kategori.index')); ?>" 
                    title="Kategori Surat"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('kategori.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('kategori.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h8M11 11h8M11 15h8"/></svg>
                     <span data-sidebar-label class="whitespace-nowrap">Kategori Surat</span>
                 </a>
 
                 <a href="<?php echo e(route('instansi.index')); ?>" 
                    title="Instansi"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('instansi.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('instansi.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     <span data-sidebar-label class="whitespace-nowrap">Instansi</span>
                 </a>
 
                 <a href="<?php echo e(route('users.index')); ?>" 
                    title="Pengguna"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 <?php echo e(request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold' : 'hover:bg-slate-800 hover:text-white text-slate-400'); ?>">
+                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 <?php echo e(request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/50 hover:text-white text-slate-400'); ?>">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     <span data-sidebar-label class="whitespace-nowrap">Pengguna</span>
                 </a>
@@ -104,8 +106,8 @@
         </nav>
 
         <!-- Footer Sidebar -->
-        <div class="p-4 border-t border-slate-800 text-center text-xs text-slate-500 font-medium whitespace-nowrap">
-            <span data-sidebar-label>E-Arsip &copy; <?php echo e(date('Y')); ?></span>
+        <div class="p-4 border-t border-slate-800/60 text-center text-xs text-slate-500 font-medium whitespace-nowrap">
+            <span data-sidebar-label>© <?php echo e(date('Y')); ?> Arsip Surat. All rights reserved.</span>
             <span data-sidebar-collapsed hidden>&copy;</span>
         </div>
     </aside>

@@ -9,7 +9,7 @@
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white">
 
 <div class="flex min-h-screen relative overflow-x-hidden">
-    <!-- Sidebar Left Navigation (Background Dark Navy #090d16 disesuaikan seperti Login) -->
+    <!-- Sidebar Left Navigation (Gelap Navy #090d16) -->
     <aside 
         id="app-sidebar"
         class="bg-[#090d16] text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/60 transition-all duration-300">
@@ -18,7 +18,7 @@
         <div class="h-16 px-4 border-b border-slate-800/60 flex items-center justify-between">
             <div id="sidebar-brand" class="flex items-center gap-3 overflow-hidden mx-auto w-full">
                 
-                <!-- IKON LOGO SURAT (Pendar Biru Khas Halaman Login) -->
+                <!-- IKON LOGO SURAT -->
                 <button type="button" data-sidebar-toggle class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0 focus:outline-none" title="Toggle Sidebar">
                     <svg class="w-5 h-5 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -26,7 +26,7 @@
                     <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#090d16] rounded-full shadow-sm"></span>
                 </button>
                 
-                <!-- NAMA SISTEM (ArsipSurat) -->
+                <!-- NAMA SISTEM (Diatur teks warna putih agar terlihat di background gelap) -->
                 <div class="flex flex-col whitespace-nowrap" data-sidebar-label>
                     <span class="font-bold text-white text-base tracking-tight font-sans">
                         Arsip<span class="text-blue-500">Surat</span>
@@ -202,7 +202,6 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', () => setSidebar(true));
     });
 
-    // Lightweight toast: no third-party notification library required.
     const flash = [
         @json(session('success')),
         @json(session('error')),
