@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-# Install system dependencies & Nginx
+# 1. Install system dependencies, Nginx, Node.js & library ZIP
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -16,26 +16,26 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm
 
-# Clear cache
+# Clear cache apt
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
+# 2. Install ekstensi PHP (termasuk zip)
 RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
-# Get latest Composer
+# 3. Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# 4. Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# 5. Copy seluruh file project
 COPY . .
 
-# Install PHP & Node dependencies
+# 6. Install dependensi PHP (Composer) & Frontend (NPM)
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 RUN npm install && npm run build
 
-# Configure Nginx
+# 7. Konfigurasi Nginx
 RUN echo 'server {\n\
     listen 8080;\n\
     index index.php index.html;\n\
@@ -59,10 +59,11 @@ RUN echo 'server {\n\
 
 EXPOSE 8080
 
-# Script Startup (Perbaikan: Buat SQLite & atur permission saat runtime)
+# 8. Script Startup (Penyiapan SQLite, Permission, Clear Cache, Migrate & Seed)
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
+echo "Setting up SQLite database & permissions..."\n\
 mkdir -p /var/www/html/database\n\
 touch /var/www/html/database/database.sqlite\n\
 chown -R www-data:www-data /var/www/html\n\
@@ -71,13 +72,13 @@ chmod 664 /var/www/html/database/database.sqlite\n\
 \n\
 sed -i "s/listen 8080;/listen ${PORT:-8080};/g" /etc/nginx/sites-available/default\n\
 \n\
-echo "Optimizing Laravel..."\n\
+echo "Clearing & optimizing Laravel caches..."\n\
 php artisan config:clear\n\
 php artisan route:clear\n\
 php artisan view:clear\n\
 \n\
-echo "Running migrations..."\n\
-php artisan migrate --force || true\n\
+echo "Running migrations and database seeders..."\n\
+php artisan migrate:fresh --seed --force || true\n\
 \n\
 echo "Starting PHP-FPM & Nginx..."\n\
 php-fpm -D\n\
