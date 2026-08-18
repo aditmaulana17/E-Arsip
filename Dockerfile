@@ -35,7 +35,7 @@ COPY . .
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 RUN npm install && npm run build
 
-# 7. Konfigurasi Nginx Bawaan
+# 7. Konfigurasi Nginx
 RUN echo 'server {\n\
     listen 8080;\n\
     index index.php index.html;\n\
@@ -57,34 +57,10 @@ RUN echo 'server {\n\
     }\n\
 }' > /etc/nginx/sites-available/default
 
-EXPOSE 8080
+# 8. Siapkan Script Startup & Permission
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
-# 8. Script Startup (Fixing \$PORT evaluation & permissions)
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-echo "Setting up SQLite database & permissions..."\n\
-mkdir -p /var/www/html/database\n\
-touch /var/www/html/database/database.sqlite\n\
-chown -R www-data:www-data /var/www/html\n\
-chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database\n\
-chmod 664 /var/www/html/database/database.sqlite\n\
-\n\
-# Mengganti port 8080 dengan port dinamis Railway ($PORT)\n\
-PORT_TO_USE="${PORT:-8080}"\n\
-sed -i "s/listen 8080;/listen ${PORT_TO_USE};/g" /etc/nginx/sites-available/default\n\
-\n\
-echo "Clearing & optimizing Laravel caches..."\n\
-php artisan config:clear\n\
-php artisan route:clear\n\
-php artisan view:clear\n\
-\n\
-echo "Running migrations and database seeders..."\n\
-php artisan migrate:fresh --seed --force || true\n\
-\n\
-echo "Starting PHP-FPM & Nginx on port ${PORT_TO_USE}..."\n\
-php-fpm -D\n\
-exec nginx -g "daemon off;"\n\
-' > /start.sh && chmod +x /start.sh
+EXPOSE 8080
 
 CMD ["/start.sh"]
