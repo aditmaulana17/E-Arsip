@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "[DEBUG] Starting setup..."
+
 echo "Setting up SQLite database & permissions..."
 mkdir -p /var/www/html/database
 touch /var/www/html/database/database.sqlite
@@ -19,9 +21,10 @@ php artisan route:clear
 php artisan view:clear
 
 echo "Running database migrations..."
-# Menggunakan migrate biasa agar data tidak terhapus saat redeploy
 php artisan migrate --force || true
 
-echo "Starting PHP-FPM & Nginx..."
+echo "[DEBUG] Starting PHP-FPM..."
 php-fpm -D
+
+echo "[DEBUG] Starting Nginx..."
 exec nginx -g "daemon off;"
