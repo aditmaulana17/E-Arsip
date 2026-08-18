@@ -14,7 +14,34 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SuratMasukController extends Controller
 {
-    // ... (method index, create tetap sama) ...
+    /**
+     * Menampilkan daftar Surat Masuk dengan filter dan pagination.
+     */
+    public function index(Request $request)
+    {
+        $suratMasuks = SuratMasuk::with(['instansi', 'kategori', 'penerima'])
+            ->filter($request->only(['search', 'kategori_id', 'instansi_id', 'status', 'dari_tanggal', 'sampai_tanggal']))
+            ->latest('tanggal_terima')
+            ->paginate(10)
+            ->withQueryString();
+
+        $kategoris = KategoriSurat::orderBy('nama_kategori')->get();
+        $instansis = Instansi::orderBy('nama_instansi')->get();
+
+        return view('surat_masuk.index', compact('suratMasuks', 'kategoris', 'instansis'));
+    }
+
+    /**
+     * Form pembuatan Surat Masuk baru.
+     */
+    public function create()
+    {
+        $kategoris = KategoriSurat::orderBy('nama_kategori')->get();
+        $instansis = Instansi::orderBy('nama_instansi')->get();
+        $nomorAgenda = SuratMasuk::generateNomorAgenda();
+
+        return view('surat_masuk.create', compact('kategoris', 'instansis', 'nomorAgenda'));
+    }
 
     /**
      * Menyimpan Surat Masuk baru ke database.
@@ -25,9 +52,8 @@ class SuratMasukController extends Controller
         $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
         $data['diterima_oleh'] = Auth::id();
 
-        // Upload file lampiran (PDF atau Gambar Hasil Scan)
+        // Upload file lampiran jika ada
         if ($request->hasFile('lampiran_file')) {
-            // Menggunakan storeAs agar nama file lebih unik dan rapi
             $file = $request->file('lampiran_file');
             $filename = 'surat_' . time() . '_' . $file->getClientOriginalName();
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
@@ -44,6 +70,27 @@ class SuratMasukController extends Controller
     }
 
     /**
+     * Menampilkan detail Surat Masuk beserta Disposisi terikat.
+     */
+    public function show(SuratMasuk $suratMasuk)
+    {
+        $suratMasuk->load(['instansi', 'kategori', 'penerima', 'disposisi.dari', 'disposisi.kepada']);
+        
+        return view('surat_masuk.show', compact('suratMasuk'));
+    }
+
+    /**
+     * Form edit Surat Masuk.
+     */
+    public function edit(SuratMasuk $suratMasuk)
+    {
+        $kategoris = KategoriSurat::orderBy('nama_kategori')->get();
+        $instansis = Instansi::orderBy('nama_instansi')->get();
+
+        return view('surat_masuk.edit', compact('suratMasuk', 'kategoris', 'instansis'));
+    }
+
+    /**
      * Memperbarui data Surat Masuk.
      */
     public function update(SuratMasukRequest $request, SuratMasuk $suratMasuk)
@@ -52,12 +99,9 @@ class SuratMasukController extends Controller
 
         // Ganti file lampiran lama jika mengunggah file baru
         if ($request->hasFile('lampiran_file')) {
-            // Hapus file lama jika ada
             if ($suratMasuk->lampiran_file && Storage::disk('public')->exists($suratMasuk->lampiran_file)) {
                 Storage::disk('public')->delete($suratMasuk->lampiran_file);
             }
-            
-            // Simpan file baru dengan nama unik
             $file = $request->file('lampiran_file');
             $filename = 'surat_' . time() . '_' . $file->getClientOriginalName();
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
@@ -73,5 +117,55 @@ class SuratMasukController extends Controller
             ->with('success', "Surat masuk dengan Nomor Agenda {$suratMasuk->nomor_agenda} berhasil diperbarui.");
     }
 
-    // ... (method destroy, cetakLabel, previewLampiran, cetakDisposisi tetap sama) ...
+    /**
+     * Menghapus (Soft Delete) data Surat Masuk.
+     */
+    public function destroy(SuratMasuk $suratMasuk)
+    {
+        $nomorAgenda = $suratMasuk->nomor_agenda;
+        
+        $suratMasuk->delete();
+        
+        ActivityLog::catat('delete', 'surat_masuk', "Menghapus surat masuk {$nomorAgenda}");
+
+        return redirect()
+            ->route('surat-masuk.index')
+            ->with('success', "Surat masuk {$nomorAgenda} berhasil dihapus.");
+    }
+
+    /**
+     * Mencetak label agenda Surat Masuk.
+     */
+    public function cetakLabel(SuratMasuk $suratMasuk)
+    {
+        $suratMasuk->load(['instansi', 'kategori']);
+        
+        return view('surat_masuk.label', compact('suratMasuk'));
+    }
+
+    /**
+     * Stream/Preview file lampiran secara langsung.
+     */
+    public function previewLampiran(string $path): BinaryFileResponse
+    {
+        $decodedPath = urldecode($path);
+
+        if (!Storage::disk('public')->exists($decodedPath)) {
+            abort(404, 'File lampiran tidak ditemukan di server.');
+        }
+
+        $filePath = Storage::disk('public')->path($decodedPath);
+
+        return response()->file($filePath);
+    }
+
+    /**
+     * Cetak Lembar Disposisi Surat Masuk.
+     */
+    public function cetakDisposisi(SuratMasuk $suratMasuk)
+    {
+        $suratMasuk->load(['instansi', 'kategori', 'penerima', 'disposisi.dari', 'disposisi.kepada']);
+        
+        return view('surat_masuk.disposisi_pdf', compact('suratMasuk'));
+    }
 }
