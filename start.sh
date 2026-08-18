@@ -18,8 +18,9 @@ php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 
-echo "Running migrations and database seeders..."
-php artisan migrate:fresh --seed --force || true
+echo "Running database migrations..."
+# Menggunakan migrate biasa agar data tidak terhapus saat redeploy
+php artisan migrate --force || true
 
 echo "Starting PHP-FPM & Nginx..."
 php-fpm -D

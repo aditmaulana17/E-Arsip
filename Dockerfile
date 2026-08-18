@@ -35,7 +35,10 @@ COPY . .
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 RUN npm install && npm run build
 
-# 7. Konfigurasi Nginx
+# Berikan permission untuk storage dan bootstrap/cache (Laravel)
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# 7. Konfigurasi Nginx (Menggunakan variabel $PORT dari Railway)
 RUN echo 'server {\n\
     listen 8080;\n\
     index index.php index.html;\n\
@@ -54,8 +57,7 @@ RUN echo 'server {\n\
     location / {\n\
         try_files $uri $uri/ /index.php?$query_string;\n\
         gzip_static on;\n\
-    }\n\
-}' > /etc/nginx/sites-available/default
+    }\n\}' > /etc/nginx/sites-available/default
 
 # 8. Siapkan Script Startup & Permission
 COPY start.sh /start.sh
