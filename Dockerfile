@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-# Install system dependencies & Nginx (Ditambahkan libzip-dev)
+# Install system dependencies & Nginx
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (Ditambahkan ekstensi zip)
+# Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
@@ -34,12 +34,6 @@ COPY . .
 # Install PHP & Node dependencies
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 RUN npm install && npm run build
-
-# Set permissions
-RUN touch /var/www/html/database/database.sqlite && \
-    chown -R www-data:www-data /var/www/html && \
-    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && \
-    chmod 664 /var/www/html/database/database.sqlite
 
 # Configure Nginx
 RUN echo 'server {\n\
@@ -65,15 +59,26 @@ RUN echo 'server {\n\
 
 EXPOSE 8080
 
-# Script Startup
+# Script Startup (Perbaikan: Buat SQLite & atur permission saat runtime)
 RUN echo '#!/bin/bash\n\
 set -e\n\
+\n\
+mkdir -p /var/www/html/database\n\
+touch /var/www/html/database/database.sqlite\n\
+chown -R www-data:www-data /var/www/html\n\
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database\n\
+chmod 664 /var/www/html/database/database.sqlite\n\
+\n\
 sed -i "s/listen 8080;/listen ${PORT:-8080};/g" /etc/nginx/sites-available/default\n\
-echo "Running migrations..."\n\
-php artisan migrate --force\n\
+\n\
+echo "Optimizing Laravel..."\n\
 php artisan config:clear\n\
-php artisan route:cache\n\
-php artisan view:cache\n\
+php artisan route:clear\n\
+php artisan view:clear\n\
+\n\
+echo "Running migrations..."\n\
+php artisan migrate --force || true\n\
+\n\
 echo "Starting PHP-FPM & Nginx..."\n\
 php-fpm -D\n\
 nginx -g "daemon off;"\n\
