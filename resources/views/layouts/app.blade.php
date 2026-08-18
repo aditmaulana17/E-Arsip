@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') - Arsip Surat</title>
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white">
 
 <div class="flex min-h-screen relative overflow-x-hidden">
-    <!-- Sidebar Left Navigation (Background dipaksa Hitam Pekat/Dark Navy via inline style) -->
+    <!-- Sidebar Left Navigation -->
     <aside 
         id="app-sidebar"
         style="background-color: #090d16 !important;"
-        class="text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/80 transition-all duration-300">
+        class="text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/80 transition-all duration-300 w-64">
         
         <!-- Brand / Logo Header Archive -->
-        <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between" style="background-color: #090d16 !important;">
+        <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between shrink-0" style="background-color: #090d16 !important;">
             <div id="sidebar-brand" class="flex items-center gap-3 overflow-hidden mx-auto w-full">
-                
                 <!-- IKON LOGO SURAT -->
                 <button type="button" data-sidebar-toggle class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0 focus:outline-none" title="Toggle Sidebar">
                     <svg class="w-5 h-5 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,7 +108,7 @@
         </nav>
 
         <!-- Footer Sidebar -->
-        <div class="p-4 border-t border-slate-800/80 text-center text-xs text-slate-500 font-medium whitespace-nowrap" style="background-color: #090d16 !important;">
+        <div class="p-4 border-t border-slate-800/80 text-center text-xs text-slate-500 font-medium whitespace-nowrap shrink-0" style="background-color: #090d16 !important;">
             <span data-sidebar-label>© {{ date('Y') }} Arsip Surat. All rights reserved.</span>
             <span data-sidebar-collapsed hidden>&copy;</span>
         </div>
@@ -165,68 +166,102 @@
     </div>
 </div>
 
-<!-- Lightweight global UI scripts -->
+<!-- Dynamic Component Notifikasi Flash Toast -->
+@if (session('success') || session('error') || session('info') || $errors->any())
+    <div id="toast-notification" class="fixed top-5 right-5 z-50 flex items-center gap-3 w-full max-w-sm p-4 text-slate-700 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-100 transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
+        @if (session('success'))
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-emerald-600 bg-emerald-50 rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1 text-sm font-semibold text-slate-800">{{ session('success') }}</div>
+        @elseif (session('error'))
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-rose-600 bg-rose-50 rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </div>
+            <div class="flex-1 text-sm font-semibold text-slate-800">{{ session('error') }}</div>
+        @elseif (session('info'))
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-blue-600 bg-blue-50 rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="flex-1 text-sm font-semibold text-slate-800">{{ session('info') }}</div>
+        @elseif ($errors->any())
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-amber-600 bg-amber-50 rounded-xl">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div class="flex-1 text-sm font-semibold text-slate-800">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <button type="button" onclick="closeToast()" class="text-slate-400 hover:text-slate-600 rounded-lg p-1 hover:bg-slate-100 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+@endif
+
+<!-- Global Scripts -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const sidebar = document.getElementById('app-sidebar');
-    const content = document.getElementById('app-content');
-    const labels = document.querySelectorAll('[data-sidebar-label]');
-    const brand = document.getElementById('sidebar-brand');
-    const collapsed = document.querySelectorAll('[data-sidebar-collapsed]');
-    const storageKey = 'sidebarOpen';
-
-    function setSidebar(open, save = true) {
-        if (!sidebar || !content) return;
-        sidebar.classList.toggle('w-64', open);
-        sidebar.classList.toggle('w-20', !open);
-        content.classList.toggle('ml-64', open);
-        content.classList.toggle('ml-20', !open);
-        labels.forEach(el => el.hidden = !open);
-        if (brand) brand.classList.toggle('w-full', open);
-        collapsed.forEach(el => el.hidden = open);
-        if (save) localStorage.setItem(storageKey, String(open));
+    function closeToast() {
+        const toast = document.getElementById('toast-notification');
+        if (toast) {
+            toast.classList.add('opacity-0', '-translate-y-2');
+            setTimeout(() => toast.remove(), 300);
+        }
     }
 
-    const saved = localStorage.getItem(storageKey);
-    setSidebar(saved === null ? true : saved === 'true', false);
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- 1. Control Sidebar Collapse / Expand ---
+        const sidebar = document.getElementById('app-sidebar');
+        const content = document.getElementById('app-content');
+        const labels = document.querySelectorAll('[data-sidebar-label]');
+        const brand = document.getElementById('sidebar-brand');
+        const collapsed = document.querySelectorAll('[data-sidebar-collapsed]');
+        const storageKey = 'sidebarOpen';
 
-    document.querySelectorAll('[data-sidebar-toggle]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const open = sidebar.classList.contains('w-64');
-            setSidebar(!open);
+        function setSidebar(open, save = true) {
+            if (!sidebar || !content) return;
+            sidebar.classList.toggle('w-64', open);
+            sidebar.classList.toggle('w-20', !open);
+            content.classList.toggle('ml-64', open);
+            content.classList.toggle('ml-20', !open);
+            labels.forEach(el => el.hidden = !open);
+            if (brand) brand.classList.toggle('w-full', open);
+            collapsed.forEach(el => el.hidden = open);
+            if (save) localStorage.setItem(storageKey, String(open));
+        }
+
+        const saved = localStorage.getItem(storageKey);
+        setSidebar(saved === null ? true : saved === 'true', false);
+
+        document.querySelectorAll('[data-sidebar-toggle]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const open = sidebar.classList.contains('w-64');
+                setSidebar(!open);
+            });
         });
+        document.querySelectorAll('[data-sidebar-collapse]').forEach(btn => {
+            btn.addEventListener('click', () => setSidebar(false));
+        });
+        document.querySelectorAll('[data-sidebar-expand]').forEach(btn => {
+            btn.addEventListener('click', () => setSidebar(true));
+        });
+
+        // Auto Close Toast Notification setelah 4.5 Detik
+        const toast = document.getElementById('toast-notification');
+        if (toast) {
+            setTimeout(() => { closeToast(); }, 4500);
+        }
+
+        // --- 2. Dynamic Global Delete Confirmation Modal ---
+        window.confirmDelete = function (event, message = 'Data yang dihapus tidak dapat dikembalikan!') {
+            event.preventDefault();
+            const form = event.target.closest('form');
+            if (!form) return;
+
+            const confirmed = window.confirm('Apakah Anda Yakin?\n\n' + message);
+            if (confirmed) form.submit();
+        };
     });
-    document.querySelectorAll('[data-sidebar-collapse]').forEach(btn => {
-        btn.addEventListener('click', () => setSidebar(false));
-    });
-    document.querySelectorAll('[data-sidebar-expand]').forEach(btn => {
-        btn.addEventListener('click', () => setSidebar(true));
-    });
-
-    const flash = [
-        @json(session('success')),
-        @json(session('error')),
-        @json($errors->any() ? 'Terjadi kesalahan input!' : null)
-    ].filter(Boolean)[0];
-
-    if (flash) {
-        const toast = document.createElement('div');
-        toast.textContent = flash;
-        toast.setAttribute('role', 'status');
-        toast.style.cssText = 'position:fixed;right:1.25rem;top:1.25rem;z-index:9999;max-width:360px;padding:.8rem 1rem;border-radius:.75rem;background:#fff;border:1px solid #e2e8f0;box-shadow:0 10px 30px rgba(15,23,42,.12);font-size:.875rem;font-weight:600;color:#334155;';
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
-    window.confirmDelete = function (event, message = 'Data yang dihapus tidak dapat dikembalikan!') {
-        event.preventDefault();
-        const form = event.target.closest('form');
-        if (!form) return;
-
-        const confirmed = window.confirm('Apakah Anda Yakin?\n\n' + message);
-        if (confirmed) form.submit();
-    };
-});
 </script>
 
 @stack('scripts')
