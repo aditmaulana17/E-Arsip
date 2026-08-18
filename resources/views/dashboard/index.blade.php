@@ -87,7 +87,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Pastikan Chart.js tetap responsive
+    // Pastikan Chart.js tetap responsive dan dimulai dari 0 di sumbu Y
     const ctx = document.getElementById('suratChart').getContext('2d');
     new Chart(ctx, {
         type: 'line',
@@ -98,7 +98,19 @@
                 { label: 'Keluar', data: @json($chartDataKeluar), borderColor: '#10b981', tension: 0.4 }
             ]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true, // Memastikan grafik selalu dimulai dari angka 0 di bawah
+                    min: 0,            // Menghilangkan skala negatif pada sumbu Y
+                    ticks: {
+                        precision: 0   // Menghindari angka desimal (seperti 0.2, 0.4) jika nilainya kecil
+                    }
+                }
+            }
+        }
     });
 </script>
 @endsection
