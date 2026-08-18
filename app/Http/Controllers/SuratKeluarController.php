@@ -145,7 +145,7 @@ class SuratKeluarController extends Controller
      *
      * Mendukung pemanggilan via Model Binding maupun Path String secara dinamis.
      */
-    public function previewLampiran(Request $request, $idOrPath): BinaryFileResponse
+    public function previewLampiran(Request $request, string $idOrPath): BinaryFileResponse
     {
         $filePath = null;
 
