@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') - Arsip Surat</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Ganti @vite(['resources/css/app.css', 'resources/js/app.js']) dengan ini: -->
+    <script src="https://cdn.tailwindcss.com"></script>
     @stack('styles')
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white">
