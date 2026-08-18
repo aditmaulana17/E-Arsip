@@ -112,12 +112,22 @@
                     <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Lampiran & Arsip Fisik</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <!-- Custom File Input -->
+                        <!-- Custom File Input / Scan Kamera -->
                         <div>
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Scan / Lampiran <span class="text-slate-400 font-normal lowercase">(PDF max 10MB)</span></label>
-                            <input type="file" name="lampiran_file" accept=".pdf"
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Scan / Lampiran <span class="text-slate-400 font-normal lowercase">(PDF / Gambar max 10MB)</span></label>
+                            
+                            <!-- Ditambahkan capture="environment" & accept gambar/pdf -->
+                            <input type="file" name="lampiran_file" accept=".pdf,image/*" capture="environment" id="lampiranFile"
                                 class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 border border-slate-200 rounded-xl cursor-pointer bg-slate-50/50">
+                            
+                            <small class="text-slate-400 text-[11px] mt-1 block">Tips: Buka via HP untuk langsung memotret fisik surat.</small>
                             @error('lampiran_file') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
+
+                            <!-- Pratinjau Gambar Hasil Scan -->
+                            <div class="mt-3" id="previewContainer" style="display: none;">
+                                <p class="text-xs font-semibold text-slate-600 mb-1">Pratinjau Hasil Scan:</p>
+                                <img id="imagePreview" src="#" alt="Preview" class="max-h-40 rounded-lg border border-slate-200 shadow-sm">
+                            </div>
                         </div>
 
                         <!-- Lokasi Fisik -->
@@ -146,4 +156,36 @@
         </div>
     </form>
 </div>
+
+<!-- Script untuk Validasi Ukuran File & Menampilkan Preview Gambar -->
+<script>
+    document.getElementById('lampiranFile').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+
+        if (file) {
+            // Batasan maksimal 10MB (10 * 1024 * 1024 bytes)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar! Maksimal ukuran yang diizinkan adalah 10MB.');
+                this.value = '';
+                previewContainer.style.display = 'none';
+                return;
+            }
+
+            // Tampilkan preview jika formatnya berupa gambar
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // Sembunyikan preview jika filenya PDF
+                previewContainer.style.display = 'none';
+            }
+        }
+    });
+</script>
 @endsection

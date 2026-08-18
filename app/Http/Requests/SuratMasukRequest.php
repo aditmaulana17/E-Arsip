@@ -21,7 +21,8 @@ class SuratMasukRequest extends FormRequest
             'kategori_surat_id' => ['required', 'exists:kategori_surats,id'],
             'perihal' => ['required', 'string', 'max:255'],
             'ringkasan' => ['nullable', 'string'],
-            'lampiran_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            // Diperbarui menjadi 10240 KB (10MB) agar sinkron dengan PRD E-Arsip
+            'lampiran_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
             'status' => ['required', 'in:baru,diproses,didisposisikan,selesai,diarsipkan'],
             'lokasi_arsip_fisik' => ['nullable', 'string', 'max:100'],
         ];
@@ -31,8 +32,8 @@ class SuratMasukRequest extends FormRequest
     {
         return [
             'required' => ':attribute wajib diisi.',
-            'lampiran_file.mimes' => 'Lampiran harus berupa PDF/JPG/PNG.',
-            'lampiran_file.max' => 'Ukuran lampiran maksimal 5MB.',
+            'lampiran_file.mimes' => 'Lampiran file wajib berupa format PDF, JPG, JPEG, atau PNG.',
+            'lampiran_file.max' => 'Ukuran lampiran file tidak boleh melebihi 10MB.',
         ];
     }
 }
