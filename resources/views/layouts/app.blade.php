@@ -21,25 +21,34 @@
         style="background-color: #090d16 !important;"
         class="text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/80 transition-all duration-300 w-64 -translate-x-full lg:translate-x-0">
         
-        <!-- Brand / Logo Header Archive -->
-        <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between shrink-0" style="background-color: #090d16 !important;">
-            <div id="sidebar-brand" class="flex items-center gap-3 overflow-hidden mx-auto w-full transition-all duration-300">
+        <!-- Brand / Logo Header dengan Tombol Toggle << di Dalamnya -->
+        <div class="h-16 px-3 border-b border-slate-800/80 flex items-center justify-between shrink-0" style="background-color: #090d16 !important;">
+            <div id="sidebar-brand" class="flex items-center gap-2.5 overflow-hidden transition-all duration-300">
                 <!-- IKON LOGO SURAT -->
-                <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0">
-                    <svg class="w-5 h-5 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0">
+                    <svg class="w-4 h-4 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-[#090d16] rounded-full shadow-sm"></span>
+                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#090d16] rounded-full shadow-sm"></span>
                 </div>
                 
                 <!-- NAMA SISTEM -->
-                <div class="flex flex-col whitespace-nowrap transition-opacity duration-200" data-sidebar-label>
-                    <span class="font-bold text-white text-base tracking-tight font-sans">
+                <div class="flex flex-col whitespace-nowrap transition-all duration-200" data-sidebar-label>
+                    <span class="font-bold text-white text-sm tracking-tight font-sans">
                         Arsip<span class="text-blue-500">Surat</span>
                     </span>
-                    <p class="text-[10px] text-slate-400 font-medium tracking-wide">Sistem Informasi Persuratan</p>
+                    <p class="text-[9px] text-slate-400 font-medium tracking-wide">Sistem Informasi Persuratan</p>
                 </div>
             </div>
+
+            <!-- Tombol Toggle << / >> di Header Sidebar -->
+            <button id="sidebar-toggle-btn" 
+                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-xl transition duration-150 focus:outline-none hidden lg:flex items-center justify-center shrink-0"
+                    title="Tutup / Buka Sidebar">
+                <svg id="toggle-icon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                </svg>
+            </button>
 
             <!-- Tombol Close khusus HP -->
             <button type="button" id="mobile-close-sidebar" class="p-1.5 text-slate-400 hover:text-white lg:hidden focus:outline-none">
@@ -106,18 +115,9 @@
             @endif
         </nav>
 
-        <!-- Footer Sidebar dengan Tombol Ikon << / >> Fungsional -->
-        <div class="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500 font-medium shrink-0" style="background-color: #090d16 !important;">
-            <span data-sidebar-label class="truncate transition-opacity duration-200">© {{ date('Y') }} Arsip Surat</span>
-            
-            <!-- Tombol Toggle << / >> di dalam Sidebar (Hanya Desktop) -->
-            <button id="sidebar-toggle-btn" 
-                    class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition duration-150 focus:outline-none hidden lg:flex items-center justify-center ml-auto"
-                    title="Tutup / Buka Sidebar">
-                <svg id="toggle-icon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                </svg>
-            </button>
+        <!-- Footer Sidebar -->
+        <div class="p-4 border-t border-slate-800/80 text-center text-xs text-slate-500 font-medium shrink-0" style="background-color: #090d16 !important;">
+            <span data-sidebar-label class="transition-opacity duration-200">© {{ date('Y') }} Arsip Surat</span>
         </div>
     </aside>
 
@@ -216,12 +216,11 @@
         const sidebar = document.getElementById('app-sidebar');
         const content = document.getElementById('app-content');
         const labels = document.querySelectorAll('[data-sidebar-label]');
-        const brand = document.getElementById('sidebar-brand');
         const backdrop = document.getElementById('sidebar-backdrop');
         const toggleIcon = document.getElementById('toggle-icon');
         const storageKey = 'sidebarOpen';
 
-        // Fungsi Toggle Sidebar Desktop (Menciutkan sidebar jadi selebar ikon saja)
+        // Fungsi Toggle Sidebar Desktop (Menciutkan sidebar dan membuat konten menjadi full)
         function toggleDesktopSidebar(save = true) {
             if (!sidebar || !content) return;
             if (window.innerWidth < 1024) return;
@@ -229,31 +228,30 @@
             const isOpen = sidebar.classList.contains('w-64');
             const targetOpen = !isOpen;
 
-            // Atur lebar sidebar & margin content utama
+            // Atur lebar sidebar & margin/lebar content utama secara penuh
             sidebar.classList.toggle('w-64', targetOpen);
             sidebar.classList.toggle('w-20', !targetOpen);
             content.classList.toggle('ml-64', targetOpen);
             content.classList.toggle('ml-20', !targetOpen);
 
-            // Sembunyikan/tampilkan teks label menu
+            // Sembunyikan atau tampilkan teks menu dengan mulus
             labels.forEach(el => {
-                el.style.opacity = targetOpen ? '1' : '0';
-                el.style.pointerEvents = targetOpen ? 'auto' : 'none';
                 if (!targetOpen) {
+                    el.style.opacity = '0';
+                    el.style.pointerEvents = 'none';
                     setTimeout(() => { if (!sidebar.classList.contains('w-64')) el.hidden = true; }, 150);
                 } else {
                     el.hidden = false;
+                    setTimeout(() => { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; }, 50);
                 }
             });
-
-            if (brand) brand.classList.toggle('w-full', targetOpen);
 
             // Ubah arah ikon panah (<< menjadi >> saat tertutup, dan sebaliknya)
             if (toggleIcon) {
                 if (targetOpen) {
-                    toggleIcon.setAttribute('d', 'M11 19l-7-7 7-7m8 14l-7-7 7-7'); // Ikon << (mengarah ke kiri)
+                    toggleIcon.setAttribute('d', 'M11 19l-7-7 7-7m8 14l-7-7 7-7'); // Ikon <<
                 } else {
-                    toggleIcon.setAttribute('d', 'M13 5l7 7-7 7M5 5l7 7-7 7'); // Ikon >> (mengarah ke kanan)
+                    toggleIcon.setAttribute('d', 'M13 5l7 7-7 7M5 5l7 7-7 7'); // Ikon >>
                 }
             }
             
