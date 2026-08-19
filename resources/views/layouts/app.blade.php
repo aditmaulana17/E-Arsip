@@ -279,10 +279,10 @@
             setTimeout(() => { closeToast(); }, 4500);
         }
 
-        // Global Delete Confirmation Modal
+        // Global Delete Confirmation Modal (Sudah Diperbaiki)
         window.confirmDelete = function (event, message = 'Data yang dihapus tidak dapat dikembalikan!') {
             event.preventDefault();
-            const form = event.target.closest 'form';
+            const form = event.target.closest('form');
             if (!form) return;
 
             const confirmed = window.confirm('Apakah Anda Yakin?\n\n' + message);
