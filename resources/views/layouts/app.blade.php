@@ -15,7 +15,7 @@
     <!-- BACKDROP MOBILE -->
     <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/50 z-20 transition-opacity duration-300 opacity-0 pointer-events-none lg:hidden"></div>
 
-    <!-- Sidebar Left Navigation (Tanpa ikon << di dalamnya) -->
+    <!-- Sidebar Left Navigation -->
     <aside 
         id="app-sidebar"
         style="background-color: #090d16 !important;"
@@ -23,7 +23,7 @@
         
         <!-- Brand / Logo Header Archive -->
         <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between shrink-0" style="background-color: #090d16 !important;">
-            <div id="sidebar-brand" class="flex items-center gap-3 overflow-hidden mx-auto w-full">
+            <div id="sidebar-brand" class="flex items-center gap-3 overflow-hidden mx-auto w-full transition-all duration-300">
                 <!-- IKON LOGO SURAT -->
                 <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0">
                     <svg class="w-5 h-5 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@
                 </div>
                 
                 <!-- NAMA SISTEM -->
-                <div class="flex flex-col whitespace-nowrap" data-sidebar-label>
+                <div class="flex flex-col whitespace-nowrap transition-opacity duration-200" data-sidebar-label>
                     <span class="font-bold text-white text-base tracking-tight font-sans">
                         Arsip<span class="text-blue-500">Surat</span>
                     </span>
@@ -48,38 +48,38 @@
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto">
+        <nav class="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto overflow-x-hidden">
             <a href="{{ route('dashboard') }}" 
                title="Dashboard"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                <span data-sidebar-label class="whitespace-nowrap">Dashboard</span>
+                <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Dashboard</span>
             </a>
 
             <a href="{{ route('surat-masuk.index') }}" 
                title="Surat Masuk"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('surat-masuk.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                <span data-sidebar-label class="whitespace-nowrap">Surat Masuk</span>
+                <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Surat Masuk</span>
             </a>
 
             <a href="{{ route('surat-keluar.index') }}" 
                title="Surat Keluar"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('surat-keluar.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                <span data-sidebar-label class="whitespace-nowrap">Surat Keluar</span>
+                <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Surat Keluar</span>
             </a>
 
             <a href="{{ route('disposisi.index') }}" 
                title="Disposisi"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('disposisi.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                 <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                <span data-sidebar-label class="whitespace-nowrap">Disposisi</span>
+                <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Disposisi</span>
             </a>
 
             <!-- Master Data -->
             @if(auth()->user()?->isAdmin() || auth()->user()?->role === 'admin')
-                <div class="pt-5 pb-2 px-3.5" data-sidebar-label>
+                <div class="pt-5 pb-2 px-3.5 transition-opacity duration-200" data-sidebar-label>
                     <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Master Data</p>
                 </div>
 
@@ -87,29 +87,37 @@
                    title="Kategori Surat"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('kategori.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h8M11 11h8M11 15h8"/></svg>
-                    <span data-sidebar-label class="whitespace-nowrap">Kategori Surat</span>
+                    <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Kategori Surat</span>
                 </a>
 
                 <a href="{{ route('instansi.index') }}" 
                    title="Instansi"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('instansi.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    <span data-sidebar-label class="whitespace-nowrap">Instansi</span>
+                    <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Instansi</span>
                 </a>
 
                 <a href="{{ route('users.index') }}" 
                    title="Pengguna"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
                     <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    <span data-sidebar-label class="whitespace-nowrap">Pengguna</span>
+                    <span data-sidebar-label class="whitespace-nowrap transition-opacity duration-200">Pengguna</span>
                 </a>
             @endif
         </nav>
 
-        <!-- Footer Sidebar -->
-        <div class="p-4 border-t border-slate-800/80 text-center text-xs text-slate-500 font-medium whitespace-nowrap shrink-0" style="background-color: #090d16 !important;">
-            <span data-sidebar-label>© {{ date('Y') }} Arsip Surat. All rights reserved.</span>
-            <span data-sidebar-collapsed hidden>&copy;</span>
+        <!-- Footer Sidebar dengan Tombol Ikon << / >> Fungsional -->
+        <div class="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500 font-medium shrink-0" style="background-color: #090d16 !important;">
+            <span data-sidebar-label class="truncate transition-opacity duration-200">© {{ date('Y') }} Arsip Surat</span>
+            
+            <!-- Tombol Toggle << / >> di dalam Sidebar (Hanya Desktop) -->
+            <button id="sidebar-toggle-btn" 
+                    class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition duration-150 focus:outline-none hidden lg:flex items-center justify-center ml-auto"
+                    title="Tutup / Buka Sidebar">
+                <svg id="toggle-icon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                </svg>
+            </button>
         </div>
     </aside>
 
@@ -121,15 +129,6 @@
             <div class="flex items-center justify-between px-4 sm:px-8 py-3.5">
                 
                 <div class="flex items-center gap-3">
-                    <!-- SATU TOMBOL TUNGGAL: Fungsional untuk Membuka & Menutup Sidebar (Desktop) -->
-                    <button id="sidebar-toggle-btn" 
-                            class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition duration-150 focus:outline-none hidden lg:block"
-                            title="Buka / Tutup Sidebar">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
-                    </button>
-
                     <!-- Tombol Hamburger khusus HP -->
                     <button type="button" id="mobile-open-sidebar" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition lg:hidden focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -218,11 +217,11 @@
         const content = document.getElementById('app-content');
         const labels = document.querySelectorAll('[data-sidebar-label]');
         const brand = document.getElementById('sidebar-brand');
-        const collapsed = document.querySelectorAll('[data-sidebar-collapsed]');
         const backdrop = document.getElementById('sidebar-backdrop');
+        const toggleIcon = document.getElementById('toggle-icon');
         const storageKey = 'sidebarOpen';
 
-        // Fungsi Toggle Sidebar Desktop (Buka / Tutup dalam 1 tombol)
+        // Fungsi Toggle Sidebar Desktop (Menciutkan sidebar jadi selebar ikon saja)
         function toggleDesktopSidebar(save = true) {
             if (!sidebar || !content) return;
             if (window.innerWidth < 1024) return;
@@ -230,13 +229,33 @@
             const isOpen = sidebar.classList.contains('w-64');
             const targetOpen = !isOpen;
 
+            // Atur lebar sidebar & margin content utama
             sidebar.classList.toggle('w-64', targetOpen);
             sidebar.classList.toggle('w-20', !targetOpen);
             content.classList.toggle('ml-64', targetOpen);
             content.classList.toggle('ml-20', !targetOpen);
-            labels.forEach(el => el.hidden = !targetOpen);
+
+            // Sembunyikan/tampilkan teks label menu
+            labels.forEach(el => {
+                el.style.opacity = targetOpen ? '1' : '0';
+                el.style.pointerEvents = targetOpen ? 'auto' : 'none';
+                if (!targetOpen) {
+                    setTimeout(() => { if (!sidebar.classList.contains('w-64')) el.hidden = true; }, 150);
+                } else {
+                    el.hidden = false;
+                }
+            });
+
             if (brand) brand.classList.toggle('w-full', targetOpen);
-            collapsed.forEach(el => el.hidden = targetOpen);
+
+            // Ubah arah ikon panah (<< menjadi >> saat tertutup, dan sebaliknya)
+            if (toggleIcon) {
+                if (targetOpen) {
+                    toggleIcon.setAttribute('d', 'M11 19l-7-7 7-7m8 14l-7-7 7-7'); // Ikon << (mengarah ke kiri)
+                } else {
+                    toggleIcon.setAttribute('d', 'M13 5l7 7-7 7M5 5l7 7-7 7'); // Ikon >> (mengarah ke kanan)
+                }
+            }
             
             if (save) localStorage.setItem(storageKey, String(targetOpen));
         }
@@ -279,7 +298,7 @@
             setTimeout(() => { closeToast(); }, 4500);
         }
 
-        // Global Delete Confirmation Modal (Sudah Diperbaiki)
+        // Global Delete Confirmation Modal
         window.confirmDelete = function (event, message = 'Data yang dihapus tidak dapat dikembalikan!') {
             event.preventDefault();
             const form = event.target.closest('form');
