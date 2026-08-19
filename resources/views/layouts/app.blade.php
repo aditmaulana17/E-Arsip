@@ -11,11 +11,15 @@
 <body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white">
 
 <div class="flex min-h-screen relative overflow-x-hidden">
+    
+    <!-- BACKDROP MOBILE (Overlay saat sidebar terbuka di HP) -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/50 z-20 transition-opacity duration-300 opacity-0 pointer-events-none lg:hidden"></div>
+
     <!-- Sidebar Left Navigation -->
     <aside 
         id="app-sidebar"
         style="background-color: #090d16 !important;"
-        class="text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/80 transition-all duration-300 w-64">
+        class="text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/80 transition-all duration-300 w-64 -translate-x-full lg:translate-x-0">
         
         <!-- Brand / Logo Header Archive -->
         <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between shrink-0" style="background-color: #090d16 !important;">
@@ -37,14 +41,18 @@
                 </div>
             </div>
 
-            <!-- IKON TOGGLE SIDEBAR << -->
+            <!-- TOMBOL CLOSE MOBILE / LAPTOP COLLAPSE -->
             <button data-sidebar-label 
                     data-sidebar-collapse 
-                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition duration-150 focus:outline-none shrink-0"
+                    class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition duration-150 focus:outline-none shrink-0 hidden lg:block"
                     title="Mengecilkan Sidebar">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                 </svg>
+            </button>
+            <!-- Tombol Close khusus HP -->
+            <button type="button" id="mobile-close-sidebar" class="p-1.5 text-slate-400 hover:text-white lg:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
@@ -114,30 +122,36 @@
         </div>
     </aside>
 
-    <!-- Right Side Content Container -->
-    <div id="app-content" class="flex-1 flex flex-col min-h-screen transition-all duration-300 ml-64">
+    <!-- Right Side Content Container (Responsive Margin: ml-0 di HP, ml-64/ml-20 di Laptop) -->
+    <div id="app-content" class="flex-1 flex flex-col min-h-screen transition-all duration-300 ml-0 lg:ml-64">
         
         <!-- Sticky Top Navigation Header -->
         <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20">
-            <div class="flex items-center justify-between px-8 py-3.5">
+            <div class="flex items-center justify-between px-4 sm:px-8 py-3.5">
                 
                 <div class="flex items-center gap-3">
+                    <!-- Tombol Toggle khusus Laptop (Collapse/Expand) -->
                     <button data-sidebar-collapsed 
                             data-sidebar-expand 
-                            class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition duration-150 focus:outline-none"
-                            title="Membuka Sidebar">
+                            class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition duration-150 focus:outline-none hidden lg:block"
+                            title="Membuka/Mengecilkan Sidebar">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                         </svg>
                     </button>
 
-                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">@yield('title', 'Dashboard')</h2>
+                    <!-- Tombol Hamburger khusus HP -->
+                    <button type="button" id="mobile-open-sidebar" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition lg:hidden">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800 tracking-tight truncate max-w-[180px] sm:max-w-none">@yield('title', 'Dashboard')</h2>
                 </div>
                 
                 <!-- Profile / User Actions -->
-                <div class="flex items-center gap-5">
-                    <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
-                        <div class="w-9 h-9 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-sm shadow-sm">
+                <div class="flex items-center gap-3 sm:gap-5">
+                    <div class="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-200">
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs sm:text-sm shadow-sm">
                             {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
                         </div>
                         <div class="text-left hidden sm:block">
@@ -150,17 +164,17 @@
 
                     <form method="POST" action="{{ Route::has('logout') ? route('logout') : url('/logout') }}">
                         @csrf
-                        <button type="submit" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition duration-150 flex items-center gap-1.5 border border-red-100">
+                        <button type="submit" class="text-xs font-semibold px-2.5 sm:px-3.5 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition duration-150 flex items-center gap-1.5 border border-red-100">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                            <span>Keluar</span>
+                            <span class="hidden sm:inline">Keluar</span>
                         </button>
                     </form>
                 </div>
             </div>
         </header>
 
-        <!-- Main Workspace Area -->
-        <main class="p-8 flex-1">
+        <!-- Main Workspace Area (Padding menyesuaikan HP dan Laptop) -->
+        <main class="p-4 sm:p-8 flex-1">
             @yield('content')
         </main>
     </div>
@@ -210,16 +224,21 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // --- 1. Control Sidebar Collapse / Expand ---
         const sidebar = document.getElementById('app-sidebar');
         const content = document.getElementById('app-content');
         const labels = document.querySelectorAll('[data-sidebar-label]');
         const brand = document.getElementById('sidebar-brand');
         const collapsed = document.querySelectorAll('[data-sidebar-collapsed]');
+        const backdrop = document.getElementById('sidebar-backdrop');
         const storageKey = 'sidebarOpen';
 
+        // Fungsi khusus Desktop (Collapse / Expand)
         function setSidebar(open, save = true) {
             if (!sidebar || !content) return;
+            
+            // Jika di HP, abaikan fungsi minimize desktop width
+            if (window.innerWidth < 1024) return;
+
             sidebar.classList.toggle('w-64', open);
             sidebar.classList.toggle('w-20', !open);
             content.classList.toggle('ml-64', open);
@@ -230,20 +249,52 @@
             if (save) localStorage.setItem(storageKey, String(open));
         }
 
-        const saved = localStorage.getItem(storageKey);
-        setSidebar(saved === null ? true : saved === 'true', false);
+        // Kontrol Mobile Drawer Open/Close
+        function openMobileSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeMobileSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Event listener tombol HP
+        const mobileOpenBtn = document.getElementById('mobile-open-sidebar');
+        const mobileCloseBtn = document.getElementById('mobile-close-sidebar');
+
+        if (mobileOpenBtn) mobileOpenBtn.addEventListener('click', openMobileSidebar);
+        if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileSidebar);
+        if (backdrop) backdrop.addEventListener('click', closeMobileSidebar);
+
+        // Inisialisasi state awal di Desktop
+        if (window.innerWidth >= 1024) {
+            const saved = localStorage.getItem(storageKey);
+            setSidebar(saved === null ? true : saved === 'true', false);
+        }
 
         document.querySelectorAll('[data-sidebar-toggle]').forEach(btn => {
             btn.addEventListener('click', () => {
-                const open = sidebar.classList.contains('w-64');
-                setSidebar(!open);
+                if (window.innerWidth < 1024) {
+                    closeMobileSidebar();
+                } else {
+                    const open = sidebar.classList.contains('w-64');
+                    setSidebar(!open);
+                }
             });
         });
+
         document.querySelectorAll('[data-sidebar-collapse]').forEach(btn => {
-            btn.addEventListener('click', () => setSidebar(false));
+            btn.addEventListener('click', () => {
+                if (window.innerWidth >= 1024) setSidebar(false);
+            });
         });
+
         document.querySelectorAll('[data-sidebar-expand]').forEach(btn => {
-            btn.addEventListener('click', () => setSidebar(true));
+            btn.addEventListener('click', () => {
+                if (window.innerWidth >= 1024) setSidebar(true);
+            });
         });
 
         // Auto Close Toast Notification setelah 4.5 Detik
@@ -252,7 +303,7 @@
             setTimeout(() => { closeToast(); }, 4500);
         }
 
-        // --- 2. Dynamic Global Delete Confirmation Modal ---
+        // --- Dynamic Global Delete Confirmation Modal ---
         window.confirmDelete = function (event, message = 'Data yang dihapus tidak dapat dikembalikan!') {
             event.preventDefault();
             const form = event.target.closest('form');
