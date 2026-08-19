@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 echo "[DEBUG] Starting setup..."
@@ -10,15 +10,23 @@ chown -R www-data:www-data /var/www/html
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod 664 /var/www/html/database/database.sqlite
 
-# Mengganti port 8080 Nginx dengan PORT dari Railway
+# Mengganti port Nginx dengan PORT dinamis dari Railway (Default ke 8080 jika tidak ada)
 PORT_TO_USE="${PORT:-8080}"
 echo "Configuring Nginx to listen on port ${PORT_TO_USE}..."
-sed -i "s/listen 8080;/listen ${PORT_TO_USE};/g" /etc/nginx/sites-available/default
+
+# Menyesuaikan path konfigurasi Nginx (biasanya di sites-available/default atau conf.d/default.conf)
+if [ -f /etc/nginx/sites-available/default ]; then
+    sed -i "s/listen [0-9]\+;/listen ${PORT_TO_USE};/g" /etc/nginx/sites-available/default
+elif [ -f /etc/nginx/conf.d/default.conf ]; then
+    sed -i "s/listen [0-9]\+;/listen ${PORT_TO_USE};/g" /etc/nginx/conf.d/default.conf
+fi
 
 echo "Clearing & optimizing Laravel caches..."
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
+php artisan config:cache
+php artisan route:cache
 
 echo "Running database migrations..."
 php artisan migrate --force || true
