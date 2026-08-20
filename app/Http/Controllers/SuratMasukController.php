@@ -49,13 +49,18 @@ class SuratMasukController extends Controller
     public function store(SuratMasukRequest $request)
     {
         $data = $request->validated();
-        $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
+        
+        // Pengecekan agar nomor agenda yang dikirim dari form divalidasi atau di-generate ulang dengan aman
+        // Jika nomor agenda kosong atau sudah dipakai, generate ulang secara otomatis
+        if (empty($data['nomor_agenda']) || SuratMasuk::where('nomor_agenda', $data['nomor_agenda'])->exists()) {
+            $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
+        }
+        
         $data['diterima_oleh'] = Auth::id();
 
         // Upload file lampiran jika ada
         if ($request->hasFile('lampiran_file')) {
             $file = $request->file('lampiran_file');
-            // Sanitasi nama file yang lebih bersih dan aman
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
             $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
