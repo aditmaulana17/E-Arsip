@@ -109,20 +109,28 @@
                 </div>
             </dl>
 
-            <!-- Lampiran Berkas Digital & Preview (Disempurnakan untuk Mobile & PC) -->
+            <!-- Lampiran Berkas Digital & Preview -->
+            @php
+                // Cek nama kolom lampiran (lampiran / lampiran_file)
+                $lampiranPath = $suratMasuk->lampiran ?? $suratMasuk->lampiran_file;
+            @endphp
+
             <div class="pt-4 border-t border-slate-100 space-y-3">
                 <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Berkas Lampiran (Digital)</dt>
-                @if($suratMasuk->lampiran_file)
+                
+                @if($lampiranPath)
                     @php
-                        $extension = pathinfo($suratMasuk->lampiran_file, PATHINFO_EXTENSION);
+                        $extension = pathinfo($lampiranPath, PATHINFO_EXTENSION);
                         $extLower = strtolower($extension);
                         $isImage = in_array($extLower, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
-                        $fileUrl = route('lampiran.preview', $suratMasuk->lampiran_file);
+                        
+                        // Buat URL storage yang bersih & konsisten
+                        $fileUrl = asset('storage/' . $lampiranPath);
                     @endphp
 
                     <div class="flex flex-wrap items-center gap-2">
                         <!-- Buka Tab Baru -->
-                        <a href="{{ $fileUrl }}" target="_blank" class="inline-flex items-center gap-2 text-xs font-semibold bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl border border-blue-200/80 hover:bg-blue-100 transition shadow-sm grow sm:grow-0 justify-center">
+                        <a href="{{ $fileUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-xs font-semibold bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl border border-blue-200/80 hover:bg-blue-100 transition shadow-sm grow sm:grow-0 justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             <span>Buka Dokumen ({{ strtoupper($extension) }})</span>
                         </a>
@@ -137,13 +145,13 @@
                     <!-- Area Embed Preview -->
                     <div class="mt-3 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-2">
                         @if($isImage)
-                            <img src="{{ $fileUrl }}" alt="Lampiran Surat" class="max-h-96 w-full object-contain rounded-lg">
+                            <img src="{{ $fileUrl }}" alt="Lampiran Surat" class="max-h-[500px] w-full object-contain rounded-lg">
                         @elseif($extLower === 'pdf')
                             <div class="space-y-2">
-                                <!-- Menggunakan Google Docs Embedded Viewer agar responsive & terbaca di HP -->
-                                <iframe src="https://docs.google.com/viewer?url={{ urlencode($fileUrl) }}&embedded=true" class="w-full h-96 rounded-lg border-0 min-h-[350px]"></iframe>
+                                <!-- Gunakan Native Iframe / Embed agar lancar di HP & PC tanpa Google Viewer -->
+                                <iframe src="{{ $fileUrl }}" class="w-full h-[500px] rounded-lg border-0 min-h-[350px]"></iframe>
                                 <p class="text-[11px] text-slate-400 text-center italic">
-                                    Dokumen tidak tampil? <a href="{{ $fileUrl }}" target="_blank" class="text-blue-600 underline font-semibold">Klik di sini untuk membuka langsung.</a>
+                                    Dokumen tidak tampil di browser Anda? <a href="{{ $fileUrl }}" target="_blank" class="text-blue-600 underline font-semibold">Klik di sini untuk membuka / mengunduh langsung.</a>
                                 </p>
                             </div>
                         @else
