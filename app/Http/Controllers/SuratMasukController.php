@@ -143,8 +143,6 @@ class SuratMasukController extends Controller
         return view('surat_masuk.label', compact('suratMasuk'));
     }
 
-    /**
-     * Stream/Preview file lampiran secara fleksibel (Support PDF, PNG, JPG, WebP).
    public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
     {
         // Fleksibilitas pengecekan nama kolom
