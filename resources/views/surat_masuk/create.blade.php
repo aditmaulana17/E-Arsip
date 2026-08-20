@@ -43,7 +43,7 @@
 
             <div class="p-4 sm:p-6 space-y-5 sm:space-y-6">
 
-                <!-- Section 1: Detail Surat -->
+                <!-- Section 1: Informasi Utama Surat -->
                 <div class="space-y-4">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Informasi Utama Surat</h2>
                     
@@ -124,27 +124,31 @@
                     <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">Lampiran & Arsip Fisik</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                        <!-- Custom File Input / Scan Kamera -->
+                        <!-- File Upload & Preview -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Scan / Lampiran <span class="text-slate-400 font-normal lowercase">(PDF / Gambar max 10MB)</span></label>
                             
-                            <!-- Input Kamera / File (Disesuaikan name-nya menjadi 'lampiran' agar cocok dengan Controller) -->
-                            <div class="flex items-center gap-2">
-                                <input type="file" name="lampiran" accept=".pdf,image/*" capture="environment" id="lampiranFile"
+                            <!-- Input File: Bekerja Fleksibel di Laptop (File Manager) dan HP (Kamera / Galeri) -->
+                            <div class="relative">
+                                <input type="file" name="lampiran" accept=".pdf,image/*" id="lampiranFile"
                                     class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl cursor-pointer bg-slate-50/50">
-                                
-                                <button type="button" onclick="document.getElementById('lampiranFile').click()" class="inline-flex sm:hidden items-center justify-center p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-medium text-xs flex-shrink-0">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                </button>
                             </div>
-                            
-                            <small class="text-slate-400 text-[11px] mt-1 block">Tips: Buka via HP untuk langsung ambil foto dokumen.</small>
+
+                            <small class="text-slate-400 text-[11px] mt-1 block">Buka via HP untuk pilihan jepret foto langsung atau memilih dari galeri.</small>
                             @error('lampiran') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
 
-                            <!-- Pratinjau Gambar Hasil Scan -->
-                            <div class="mt-3" id="previewContainer" style="display: none;">
-                                <p class="text-xs font-semibold text-slate-600 mb-1">Pratinjau Hasil Foto/Scan:</p>
-                                <img id="imagePreview" src="#" alt="Preview" class="max-h-40 rounded-lg border border-slate-200 shadow-sm object-contain">
+                            <!-- Container Pratinjau Berkas Terpilih -->
+                            <div class="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl" id="previewContainer" style="display: none;">
+                                <p class="text-xs font-semibold text-slate-600 mb-1.5">Pratinjau Berkas Terpilih:</p>
+                                
+                                <!-- Preview jika berupa Gambar -->
+                                <img id="imagePreview" src="#" alt="Preview" class="max-h-48 rounded-lg border border-slate-200 shadow-sm object-contain hidden">
+                                
+                                <!-- Preview jika berupa PDF -->
+                                <div id="pdfInfo" class="hidden items-center text-xs text-slate-700 font-medium">
+                                    <svg class="w-6 h-6 text-rose-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V7.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 1H7a2 2 0 00-2 2v16a2 2 0 002 2z"/></svg>
+                                    <span id="pdfFileName" class="truncate">Dokumen PDF Terpilih</span>
+                                </div>
                             </div>
                         </div>
 
@@ -152,7 +156,7 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Lokasi Arsip Fisik</label>
                             <input type="text" name="lokasi_arsip_fisik" value="{{ old('lokasi_arsip_fisik') }}" placeholder="Contoh: Rak A-3 Box 12"
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150">
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 @error('lokasi_arsip_fisik') border-rose-500 bg-rose-50/30 @enderror">
                             @error('lokasi_arsip_fisik') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
                     </div>
@@ -175,15 +179,17 @@
     </form>
 </div>
 
-<!-- Script untuk Validasi Ukuran File & Preview Gambar -->
+<!-- Script Validasi Ukuran File, Multi-Format Preview & Prevent Double Submit -->
 <script>
     document.getElementById('lampiranFile').addEventListener('change', function(event) {
         const file = event.target.files[0];
         const previewContainer = document.getElementById('previewContainer');
         const imagePreview = document.getElementById('imagePreview');
+        const pdfInfo = document.getElementById('pdfInfo');
+        const pdfFileName = document.getElementById('pdfFileName');
 
         if (file) {
-            // Batasan maksimal 10MB (10 * 1024 * 1024 bytes)
+            // Batasan maksimal 10MB
             if (file.size > 10 * 1024 * 1024) {
                 alert('Ukuran file/foto terlalu besar! Maksimal ukuran adalah 10MB.');
                 this.value = '';
@@ -191,22 +197,32 @@
                 return;
             }
 
-            // Tampilkan preview jika formatnya berupa gambar
+            previewContainer.style.display = 'block';
+
+            // Tampilkan preview berdasarkan jenis berkas
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imagePreview.src = e.target.result;
-                    previewContainer.style.display = 'block';
+                    imagePreview.classList.remove('hidden');
+                    pdfInfo.classList.add('hidden');
+                    pdfInfo.classList.remove('flex');
                 }
                 reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                imagePreview.classList.add('hidden');
+                pdfFileName.textContent = file.name + ' (' + (file.size / (1024 * 1024)).toFixed(2) + ' MB)';
+                pdfInfo.classList.remove('hidden');
+                pdfInfo.classList.add('flex');
             } else {
-                // Sembunyikan preview jika filenya PDF
                 previewContainer.style.display = 'none';
             }
+        } else {
+            previewContainer.style.display = 'none';
         }
     });
 
-    // Mencegah Double Submit saat tombol ditekan
+    // Mencegah double submit saat form dikirim
     document.getElementById('formSuratMasuk').addEventListener('submit', function() {
         const btn = document.getElementById('btnSubmit');
         btn.disabled = true;
