@@ -16,13 +16,13 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm
 
-# Clear cache apt
+# Clear cache apt untuk memperkecil ukuran image
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Install ekstensi PHP
 RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
-# 3. Get latest Composer
+# 3. Ambil Composer versi terbaru
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # 4. Set working directory
@@ -31,39 +31,16 @@ WORKDIR /var/www/html
 # 5. Copy seluruh file project
 COPY . .
 
-# 6. PERBAIKAN: Konfigurasi Timeout Composer & Install Dependencies
+# 6. Install dependensi PHP (Composer) & Frontend (NPM)
 RUN composer config --global process-timeout 2000 \
     && composer install --optimize-autoloader --no-dev --no-interaction --prefer-source
 
-# Build Frontend (NPM)
 RUN npm install && npm run build
 
-# Berikan permission untuk storage dan bootstrap/cache (Laravel)
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# 7. Bersihkan konfigurasi Nginx bawaan agar tidak konflik dengan start.sh
+RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
 
-# 7. Konfigurasi Nginx
-RUN echo "server {" > /etc/nginx/sites-available/default && \
-    echo "    listen 8080;" >> /etc/nginx/sites-available/default && \
-    echo "    index index.php index.html;" >> /etc/nginx/sites-available/default && \
-    echo "    error_log  /var/log/nginx/error.log;" >> /etc/nginx/sites-available/default && \
-    echo "    access_log /var/log/nginx/access.log;" >> /etc/nginx/sites-available/default && \
-    echo "    root /var/www/html/public;" >> /etc/nginx/sites-available/default && \
-    echo "    location ~ \.php$ {" >> /etc/nginx/sites-available/default && \
-    echo "        try_files \$uri =404;" >> /etc/nginx/sites-available/default && \
-    echo "        fastcgi_split_path_info ^(.+\.php)(/.+)\$; " >> /etc/nginx/sites-available/default && \
-    echo "        fastcgi_pass 127.0.0.1:9000;" >> /etc/nginx/sites-available/default && \
-    echo "        fastcgi_index index.php;" >> /etc/nginx/sites-available/default && \
-    echo "        include fastcgi_params;" >> /etc/nginx/sites-available/default && \
-    echo "        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;" >> /etc/nginx/sites-available/default && \
-    echo "        fastcgi_param PATH_INFO \$fastcgi_path_info;" >> /etc/nginx/sites-available/default && \
-    echo "    }" >> /etc/nginx/sites-available/default && \
-    echo "    location / {" >> /etc/nginx/sites-available/default && \
-    echo "        try_files \$uri \$uri/ /index.php?\$query_string;" >> /etc/nginx/sites-available/default && \
-    echo "        gzip_static on;" >> /etc/nginx/sites-available/default && \
-    echo "    }" >> /etc/nginx/sites-available/default && \
-    echo "}" >> /etc/nginx/sites-available/default
-
-# 8. Siapkan Script Startup & Permission
+# 8. Siapkan Script Startup & Hak Akses
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
