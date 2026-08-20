@@ -12,7 +12,6 @@ use App\Http\Controllers\SuratMasukController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,7 +73,7 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- SURAT MASUK ---
-    // (Route khusus ditaruh DI ATAS Route::resource agar tidak tertimpa)
+    // Menggunakan parameter {suratMasuk} agar sinkron dengan Controller Model Binding
     Route::get('surat-masuk/{suratMasuk}/preview', [SuratMasukController::class, 'previewLampiran'])->name('surat-masuk.preview');
     Route::get('surat-masuk/{suratMasuk}/label', [SuratMasukController::class, 'cetakLabel'])->name('surat-masuk.label');
     Route::get('surat-masuk/{suratMasuk}/cetak-disposisi', [SuratMasukController::class, 'cetakDisposisi'])->name('surat-masuk.cetak-disposisi');

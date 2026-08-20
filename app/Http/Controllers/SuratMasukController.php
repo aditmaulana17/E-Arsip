@@ -144,18 +144,23 @@ class SuratMasukController extends Controller
     }
 
     /**
-     * Stream/Preview file lampiran berdasarkan Model Binding (Menghindari 403 & Path Decoding Error).
-     */
-    public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
+     * Stream/Preview file lampiran secara fleksibel (Support PDF, PNG, JPG, WebP).
+   public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
     {
-        if (!$suratMasuk->lampiran_file || !Storage::disk('public')->exists($suratMasuk->lampiran_file)) {
+        // Fleksibilitas pengecekan nama kolom
+        $fileRelativePath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
+
+        if (!$fileRelativePath || !Storage::disk('public')->exists($fileRelativePath)) {
             abort(404, 'File lampiran tidak ditemukan di server.');
         }
 
-        $filePath = Storage::disk('public')->path($suratMasuk->lampiran_file);
+        $filePath = Storage::disk('public')->path($fileRelativePath);
+        
+        // Menggunakan helper native PHP untuk menghindari error/warning pada VS Code Intelephense
+        $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
 
         return response()->file($filePath, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type'        => $mimeType,
             'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
         ]);
     }
@@ -166,7 +171,7 @@ class SuratMasukController extends Controller
     public function cetakDisposisi(SuratMasuk $suratMasuk)
     {
         $suratMasuk->load(['instansi', 'kategori', 'penerima', 'disposisi.dari', 'disposisi.kepada']);
-        
+
         return view('surat_masuk.disposisi_pdf', compact('suratMasuk'));
     }
 }
