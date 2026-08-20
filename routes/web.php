@@ -73,29 +73,41 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Route Preview Lampiran File Anti 404
+    // Route Preview Lampiran File
+    // Route Preview Lampiran File
     Route::get('lampiran/preview/{path}', function ($path) {
-        $cleanPath = preg_replace('/^(storage\/|public\/)/', '', $path);
-        $disk = Storage::disk('public');
+        try {
+            $cleanPath = preg_replace('/^(storage\/|public\/)/', '', $path);
+            $disk = Storage::disk('public');
 
-        $pathsToTry = [
-            $cleanPath,
-            $path,
-            'lampiran/surat_masuk/' . basename($cleanPath),
-            'lampiran/surat_keluar/' . basename($cleanPath)
-        ];
+            $pathsToTry = [
+                $cleanPath,
+                $path,
+                'lampiran/surat_masuk/' . basename($cleanPath),
+                'lampiran/surat_keluar/' . basename($cleanPath)
+            ];
 
-        foreach ($pathsToTry as $tryPath) {
-            if ($disk->exists($tryPath)) {
-                return response()->file($disk->path($tryPath));
+            foreach ($pathsToTry as $tryPath) {
+                if ($disk->exists($tryPath)) {
+                    $fullPath = $disk->path($tryPath);
+                    $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/pdf';
+
+                    return response($disk->get($tryPath), 200)->header('Content-Type', $mimeType);
+                }
             }
-        }
 
-        if (Storage::exists($cleanPath)) {
-            return response()->file(Storage::path($cleanPath));
-        }
+            // Fallback untuk storage default
+            if (Storage::exists($cleanPath)) {
+                $fullPath = Storage::path($cleanPath);
+                $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/pdf';
 
-        abort(404, 'File lampiran tidak ditemukan atau terhapus.');
+                return response(Storage::get($cleanPath), 200)->header('Content-Type', $mimeType);
+            }
+
+            abort(404, 'File lampiran tidak ditemukan.');
+        } catch (\Exception $e) {
+            abort(500, 'Gagal memuat file lampiran.');
+        }
     })->where('path', '.*')->name('lampiran.preview');
 
     // --- SURAT MASUK ---
@@ -109,7 +121,6 @@ Route::middleware('auth')->group(function () {
     // --- DISPOSISI ---
     Route::get('surat-masuk/{suratMasuk}/disposisi/create', [DisposisiController::class, 'create'])->name('disposisi.create');
     Route::patch('disposisi/{disposisi}/status', [DisposisiController::class, 'updateStatus'])->name('disposisi.status');
-    // Diperbarui: Mengizinkan method edit & update
     Route::resource('disposisi', DisposisiController::class)->only(['index', 'store', 'show', 'edit', 'update', 'destroy']);
 
     // --- EXPORT DATA (Excel & PDF) ---
