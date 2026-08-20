@@ -1,240 +1,129 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - Arsip Surat</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    @stack('styles')
+
+    <title>@yield('title', 'Sistem Manajemen Surat') - {{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (Vite / CDN Fallback) -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <script src="https://cdn.tailwindcss.com"></script>
+    @endif
+
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500 selection:text-white">
+<body class="h-full text-slate-700 bg-slate-50 antialiased selection:bg-blue-500 selection:text-white" x-data="{ sidebarOpen: false }">
 
-<div class="flex min-h-screen relative overflow-x-hidden">
-    
-    <!-- BACKDROP MOBILE -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/50 z-25 transition-opacity duration-300 opacity-0 pointer-events-none lg:hidden"></div>
+    <div class="min-h-screen flex flex-col md:flex-row">
 
-    <!-- Sidebar Left Navigation (Tetap Permanen) -->
-    <aside 
-        id="app-sidebar"
-        style="background-color: #090d16 !important;"
-        class="text-slate-300 flex flex-col fixed h-full z-30 shadow-2xl border-r border-slate-800/80 w-64 -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        
-        <!-- Brand / Logo Header -->
-        <div class="h-16 px-4 border-b border-slate-800/80 flex items-center justify-between shrink-0" style="background-color: #090d16 !important;">
-            <div class="flex items-center gap-3 overflow-hidden">
-                <!-- IKON LOGO SURAT -->
-                <div class="relative w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 ring-1 ring-white/20 shrink-0">
-                    <svg class="w-4 h-4 text-white drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-[#090d16] rounded-full shadow-sm"></span>
+        <!-- Mobile Backdrop -->
+        <div x-show="sidebarOpen" 
+             x-transition:enter="transition-opacity ease-linear duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="sidebarOpen = false" 
+             class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden" 
+             style="display: none;"></div>
+
+        <!-- Sidebar -->
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" 
+               class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transition-transform duration-300 ease-in-out md:translate-x-0 flex flex-col justify-between shrink-0">
+            
+            <div>
+                <!-- Sidebar Header / Logo -->
+                <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/30">
+                        S
+                    </div>
+                    <div>
+                        <span class="font-bold text-white tracking-wide text-sm block">E-Arsip Surat</span>
+                        <span class="text-[10px] text-slate-400 block font-medium">Sistem Informasi Kantor</span>
+                    </div>
                 </div>
-                
-                <!-- NAMA SISTEM -->
-                <div class="flex flex-col whitespace-nowrap">
-                    <span class="font-bold text-white text-sm tracking-tight font-sans">
-                        Arsip<span class="text-blue-500">Surat</span>
-                    </span>
-                    <p class="text-[9px] text-slate-400 font-medium tracking-wide">Sistem Informasi Persuratan</p>
-                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-4 space-y-1 text-xs font-semibold">
+                    <a href="{{ route('dashboard') ?? '#' }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <div class="pt-4 pb-1 px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Modul Surat</div>
+
+                    <a href="{{ route('surat-masuk.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/20 font-bold transition">
+                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                        <span>Surat Masuk</span>
+                    </a>
+                </nav>
             </div>
 
-            <!-- Tombol Close khusus HP -->
-            <button type="button" id="mobile-close-sidebar" class="p-1.5 text-slate-400 hover:text-white lg:hidden focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-
-        <!-- Navigation Links -->
-        <nav class="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto overflow-x-hidden">
-            <a href="{{ route('dashboard') }}" 
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                <span class="whitespace-nowrap">Dashboard</span>
-            </a>
-
-            <a href="{{ route('surat-masuk.index') }}" 
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('surat-masuk.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                <span class="whitespace-nowrap">Surat Masuk</span>
-            </a>
-
-            <a href="{{ route('surat-keluar.index') }}" 
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('surat-keluar.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                <span class="whitespace-nowrap">Surat Keluar</span>
-            </a>
-
-            <a href="{{ route('disposisi.index') }}" 
-               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('disposisi.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                <span class="whitespace-nowrap">Disposisi</span>
-            </a>
-
-            <!-- Master Data -->
-            @if(auth()->user()?->isAdmin() || auth()->user()?->role === 'admin')
-                <div class="pt-5 pb-2 px-3.5">
-                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Master Data</p>
-                </div>
-
-                <a href="{{ route('kategori.index') }}" 
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('kategori.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h8M11 11h8M11 15h8"/></svg>
-                    <span class="whitespace-nowrap">Kategori Surat</span>
-                </a>
-
-                <a href="{{ route('instansi.index') }}" 
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('instansi.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    <span class="whitespace-nowrap">Instansi</span>
-                </a>
-
-                <a href="{{ route('users.index') }}" 
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 {{ request()->routeIs('users.*') ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'hover:bg-slate-800/60 hover:text-white text-slate-400' }}">
-                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    <span class="whitespace-nowrap">Pengguna</span>
-                </a>
-            @endif
-        </nav>
-
-        <!-- Footer Sidebar (Tanpa Tombol Toggle) -->
-        <div class="p-4 border-t border-slate-800/80 flex items-center justify-center text-xs text-slate-500 font-medium shrink-0" style="background-color: #090d16 !important;">
-            <span class="truncate">© {{ date('Y') }} Arsip Surat</span>
-        </div>
-    </aside>
-
-    <!-- Right Side Content Container (Margin Left Tetap w-64 di Layar Besar) -->
-    <div class="flex-1 flex flex-col min-h-screen ml-0 lg:ml-64">
-        
-        <!-- Sticky Top Navigation Header -->
-        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20">
-            <div class="flex items-center justify-between px-4 sm:px-8 py-3.5">
-                
+            <!-- Footer User Info -->
+            <div class="p-4 border-t border-slate-800">
                 <div class="flex items-center gap-3">
-                    <!-- Tombol Hamburger khusus HP -->
-                    <button type="button" id="mobile-open-sidebar" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition lg:hidden focus:outline-none">
+                    <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center font-bold text-white text-xs border border-slate-600">
+                        {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
+                    </div>
+                    <div class="truncate">
+                        <p class="text-xs font-semibold text-white truncate">{{ Auth::user()->name ?? 'Administrator' }}</p>
+                        <p class="text-[10px] text-slate-400 truncate">{{ Auth::user()->email ?? 'admin@mail.com' }}</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+            <!-- Top Header Navbar -->
+            <header class="h-16 bg-white border-b border-slate-200/80 flex items-center justify-between px-4 sm:px-6 z-10">
+                <div class="flex items-center gap-3">
+                    <!-- Mobile Hamburger Button -->
+                    <button @click="sidebarOpen = !sidebarOpen" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
-
-                    <h2 class="text-base sm:text-lg font-bold text-slate-800 tracking-tight truncate max-w-[180px] sm:max-w-none">@yield('title', 'Dashboard')</h2>
+                    <span class="text-xs font-semibold text-slate-400 hidden sm:inline-block">Sistem Informasi Pengelolaan Surat</span>
                 </div>
-                
-                <!-- Profile / User Actions -->
-                <div class="flex items-center gap-3 sm:gap-5">
-                    <div class="flex items-center gap-3 pl-2 sm:pl-4 border-l border-slate-200">
-                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs sm:text-sm shadow-sm">
-                            {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-                        </div>
-                        <div class="text-left hidden sm:block">
-                            <p class="text-sm font-bold text-slate-800 leading-tight">{{ auth()->user()->name ?? 'Pengguna' }}</p>
-                            <p class="text-xs text-slate-400 font-medium mt-0.5">
-                                {{ ucfirst(auth()->user()->role ?? 'User') }} &middot; {{ auth()->user()->jabatan ?? 'Staf' }}
-                            </p>
-                        </div>
-                    </div>
 
-                    <form method="POST" action="{{ Route::has('logout') ? route('logout') : url('/logout') }}">
+                <!-- Right Nav Items -->
+                <div class="flex items-center gap-3">
+                    <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-xs font-semibold px-2.5 sm:px-3.5 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition duration-150 flex items-center gap-1.5 border border-red-100">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                            <span class="hidden sm:inline">Keluar</span>
+                        <button type="submit" class="text-xs font-semibold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
+                            Keluar
                         </button>
                     </form>
                 </div>
-            </div>
-        </header>
+            </header>
 
-        <!-- Main Workspace Area -->
-        <main class="p-4 sm:p-8 flex-1">
-            @yield('content')
-        </main>
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                <!-- Flash Messages -->
+                @if (session('success'))
+                    <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between">
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @yield('content')
+            </main>
+        </div>
     </div>
-</div>
 
-<!-- Notifikasi Flash Toast -->
-@if (session('success') || session('error') || session('info') || $errors->any())
-    <div id="toast-notification" class="fixed top-5 right-5 z-50 flex items-center gap-3 w-full max-w-sm p-4 text-slate-700 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-100 transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
-        @if (session('success'))
-            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-emerald-600 bg-emerald-50 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            </div>
-            <div class="flex-1 text-sm font-semibold text-slate-800">{{ session('success') }}</div>
-        @elseif (session('error'))
-            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-rose-600 bg-rose-50 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </div>
-            <div class="flex-1 text-sm font-semibold text-slate-800">{{ session('error') }}</div>
-        @elseif (session('info'))
-            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-blue-600 bg-blue-50 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div class="flex-1 text-sm font-semibold text-slate-800">{{ session('info') }}</div>
-        @elseif ($errors->any())
-            <div class="inline-flex items-center justify-center flex-shrink-0 w-10 h-10 text-amber-600 bg-amber-50 rounded-xl">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            </div>
-            <div class="flex-1 text-sm font-semibold text-slate-800">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
-        <button type="button" onclick="closeToast()" class="text-slate-400 hover:text-slate-600 rounded-lg p-1 hover:bg-slate-100 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-    </div>
-@endif
-
-<!-- Global Scripts -->
-<script>
-    function closeToast() {
-        const toast = document.getElementById('toast-notification');
-        if (toast) {
-            toast.classList.add('opacity-0', '-translate-y-2');
-            setTimeout(() => toast.remove(), 300);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('app-sidebar');
-        const backdrop = document.getElementById('sidebar-backdrop');
-
-        function openMobileSidebar() {
-            sidebar.classList.remove('-translate-x-full');
-            backdrop.classList.remove('opacity-0', 'pointer-events-none');
-        }
-
-        function closeMobileSidebar() {
-            sidebar.classList.add('-translate-x-full');
-            backdrop.classList.add('opacity-0', 'pointer-events-none');
-        }
-
-        const mobileOpenBtn = document.getElementById('mobile-open-sidebar');
-        const mobileCloseBtn = document.getElementById('mobile-close-sidebar');
-
-        if (mobileOpenBtn) mobileOpenBtn.addEventListener('click', openMobileSidebar);
-        if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileSidebar);
-        if (backdrop) backdrop.addEventListener('click', closeMobileSidebar);
-
-        // Auto Close Toast Notification
-        const toast = document.getElementById('toast-notification');
-        if (toast) {
-            setTimeout(() => { closeToast(); }, 4500);
-        }
-
-        // Global Delete Confirmation Modal
-        window.confirmDelete = function (event, message = 'Data yang dihapus tidak dapat dikembalikan!') {
-            event.preventDefault();
-            const form = event.target.closest('form');
-            if (!form) return;
-
-            const confirmed = window.confirm('Apakah Anda Yakin?\n\n' + message);
-            if (confirmed) form.submit();
-        };
-    });
-</script>
-
-@stack('scripts')
+    <!-- Alpine.js untuk penanganan interaksi UI sederhana -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
