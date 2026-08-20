@@ -11,7 +11,6 @@ if [ ! -f /var/www/html/database/database.sqlite ]; then
     touch /var/www/html/database/database.sqlite
 fi
 
-# Berikan izin penuh pada folder storage & database
 chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod 666 /var/www/html/database/database.sqlite
 
@@ -48,12 +47,10 @@ echo "[3/4] Memulai Layanan PHP-FPM..."
 php-fpm -D
 
 echo "[4/4] Menjalankan Task Laravel & Nginx..."
-# Jalankan optimasi Laravel
 php artisan storage:link --force || true
 php artisan migrate --force || true
 php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 
-# Jalankan Nginx di foreground
 exec nginx -g "daemon off;"
