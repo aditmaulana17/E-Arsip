@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[1/5] Menyiapkan Folder Storage..."
+echo "[1/5] Menyiapkan Folder Storage & Subdirektori..."
 mkdir -p /var/www/html/database
 mkdir -p /var/www/html/storage/framework/{sessions,views,cache}
-mkdir -p /var/www/html/storage/app/public
+mkdir -p /var/www/html/storage/app/public/lampiran/surat_masuk
+mkdir -p /var/www/html/storage/app/public/lampiran/surat_keluar
 mkdir -p /var/www/html/bootstrap/cache
 
 if [ ! -f /var/www/html/database/database.sqlite ]; then
@@ -22,7 +23,7 @@ chown -R www-data:www-data /var/www/html/storage /var/www/html/public
 
 RAILWAY_PORT="${PORT:-8080}"
 
-# 4. Konfigurasi Nginx yang Benar untuk Laravel Storage & Upload
+# 4. Konfigurasi Nginx
 cat <<EOF > /etc/nginx/conf.d/laravel.conf
 server {
     listen ${RAILWAY_PORT};
@@ -32,7 +33,7 @@ server {
 
     index index.php index.html;
 
-    # Naikkan batas ukuran upload file (PDF/Dokumen besar)
+    # Naikkan batas ukuran upload file di level Nginx
     client_max_body_size 64M;
 
     location / {
