@@ -56,12 +56,12 @@
 
                 @php
                     $badgeClass = match(strtolower($suratMasuk->status ?? '')) {
-                        'baru'          => 'bg-blue-50 text-blue-700 border-blue-200',
-                        'diproses'      => 'bg-amber-50 text-amber-700 border-amber-200',
+                        'baru'           => 'bg-blue-50 text-blue-700 border-blue-200',
+                        'diproses'       => 'bg-amber-50 text-amber-700 border-amber-200',
                         'didisposisikan'=> 'bg-purple-50 text-purple-700 border-purple-200',
-                        'selesai'       => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        'diarsipkan'    => 'bg-slate-100 text-slate-700 border-slate-200',
-                        default         => 'bg-slate-100 text-slate-600 border-slate-200'
+                        'selesai'        => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                        'diarsipkan'     => 'bg-slate-100 text-slate-700 border-slate-200',
+                        default          => 'bg-slate-100 text-slate-600 border-slate-200'
                     };
                 @endphp
                 <span class="self-start inline-block px-3 py-1 rounded-full text-xs font-semibold border shrink-0 {{ $badgeClass }}">
@@ -86,13 +86,13 @@
                 <div>
                     <dt class="font-bold uppercase tracking-wider text-slate-400 mb-1">Tanggal Surat</dt>
                     <dd class="text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-100">
-                        {{ optional($suratMasuk->tanggal_surat)->format('d-m-Y') ?? '-' }}
+                        {{ $suratMasuk->tanggal_surat ? \Carbon\Carbon::parse($suratMasuk->tanggal_surat)->format('d-m-Y') : '-' }}
                     </dd>
                 </div>
                 <div>
                     <dt class="font-bold uppercase tracking-wider text-slate-400 mb-1">Tanggal Diterima</dt>
                     <dd class="text-xs sm:text-sm font-semibold text-slate-700 bg-slate-50 px-3.5 py-2.5 rounded-xl border border-slate-100">
-                        {{ optional($suratMasuk->tanggal_terima)->format('d-m-Y') ?? '-' }}
+                        {{ $suratMasuk->tanggal_terima ? \Carbon\Carbon::parse($suratMasuk->tanggal_terima)->format('d-m-Y') : '-' }}
                     </dd>
                 </div>
                 <div>
@@ -122,8 +122,6 @@
                         $extension = pathinfo($lampiranPath, PATHINFO_EXTENSION);
                         $extLower = strtolower($extension);
                         $isImage = in_array($extLower, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
-                        
-                        // PERBAIKAN: Gunakan Route Controller untuk Menghindari Error 403 Forbidden
                         $fileUrl = route('surat-masuk.preview', $suratMasuk->id);
                     @endphp
 
@@ -147,7 +145,6 @@
                             <img src="{{ $fileUrl }}" alt="Lampiran Surat" class="max-h-[500px] w-full object-contain rounded-lg">
                         @elseif($extLower === 'pdf')
                             <div class="space-y-2">
-                                <!-- Native Iframe yang mengambil stream langsung dari controller -->
                                 <iframe src="{{ $fileUrl }}" class="w-full h-[500px] rounded-lg border-0 min-h-[350px]"></iframe>
                                 <p class="text-[11px] text-slate-400 text-center italic">
                                     Dokumen tidak tampil di browser Anda? <a href="{{ $fileUrl }}" target="_blank" class="text-blue-600 underline font-semibold">Klik di sini untuk membuka / mengunduh langsung.</a>
@@ -179,7 +176,7 @@
                 @forelse($suratMasuk->disposisi as $d)
                     <div class="border-l-4 border-purple-500 bg-slate-50/80 p-3.5 rounded-r-2xl border border-slate-100 space-y-2">
                         <p class="text-xs font-bold text-slate-800 leading-snug">
-                            {{ $d->dari->name ?? 'Admin' }} <span class="text-purple-600 font-normal mx-0.5">→</span> {{ $d->kepada->name ?? '-' }}
+                            {{ $d->dari->name ?? 'Admin' }} <span class="text-purple-600 font-normal mx-0.5">&rarr;</span> {{ $d->kepada->name ?? '-' }}
                         </p>
                         <p class="text-xs text-slate-600 leading-relaxed break-words">{{ $d->instruksi ?? '-' }}</p>
                         <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
@@ -187,7 +184,7 @@
                                 {{ ucfirst($d->status ?? 'Dikirim') }}
                             </span>
                             <span class="text-[10px] text-slate-400 font-medium">
-                                {{ optional($d->created_at)->format('d/m/Y H:i') }}
+                                {{ $d->created_at ? \Carbon\Carbon::parse($d->created_at)->format('d/m/Y H:i') : '-' }}
                             </span>
                         </div>
                     </div>

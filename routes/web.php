@@ -73,13 +73,16 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- SURAT MASUK ---
-    // Menggunakan parameter {suratMasuk} agar sinkron dengan Controller Model Binding
+    // Dipasang sebelum Route::resource agar tidak bertabrakan dengan {suratMasuk}
     Route::get('surat-masuk/{suratMasuk}/preview', [SuratMasukController::class, 'previewLampiran'])->name('surat-masuk.preview');
+    Route::get('surat-masuk/{suratMasuk}/download', [SuratMasukController::class, 'downloadLampiran'])->name('surat-masuk.download');
     Route::get('surat-masuk/{suratMasuk}/label', [SuratMasukController::class, 'cetakLabel'])->name('surat-masuk.label');
     Route::get('surat-masuk/{suratMasuk}/cetak-disposisi', [SuratMasukController::class, 'cetakDisposisi'])->name('surat-masuk.cetak-disposisi');
     Route::resource('surat-masuk', SuratMasukController::class);
 
     // --- SURAT KELUAR ---
+    Route::get('surat-keluar/{suratKeluar}/preview', [SuratKeluarController::class, 'previewLampiran'])->name('surat-keluar.preview');
+    Route::get('surat-keluar/{suratKeluar}/download', [SuratKeluarController::class, 'downloadLampiran'])->name('surat-keluar.download');
     Route::resource('surat-keluar', SuratKeluarController::class);
 
     // --- DISPOSISI ---

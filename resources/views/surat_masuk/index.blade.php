@@ -5,6 +5,17 @@
 @section('content')
 <div class="space-y-4 sm:space-y-6">
 
+    <!-- FLASH NOTIFICATION -->
+    @if(session('success'))
+        <div class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-700 text-sm">
+            <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="font-medium">{{ session('success') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 font-bold text-lg leading-none">&times;</button>
+        </div>
+    @endif
+
     <!-- HEADER & BARIS TOMBOL AKSI -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -98,17 +109,17 @@
     <!-- WRAPPER DATA (TABEL DESKTOP & KARTU MOBILE) -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
         
-        <!-- VIEW MOBILE (Hanya tampil di HP / layar < md) -->
+        <!-- VIEW MOBILE (Layar < md) -->
         <div class="block md:hidden divide-y divide-slate-100">
             @forelse($suratMasuks as $s)
                 @php
                     $badgeClass = match(strtolower($s->status ?? '')) {
-                        'baru'           => 'bg-blue-50 text-blue-700 border-blue-200',
-                        'diproses'       => 'bg-amber-50 text-amber-700 border-amber-200',
-                        'didisposisikan' => 'bg-purple-50 text-purple-700 border-purple-200',
-                        'selesai'        => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        'diarsipkan'     => 'bg-slate-100 text-slate-700 border-slate-200',
-                        default          => 'bg-slate-100 text-slate-600 border-slate-200'
+                        'baru'          => 'bg-blue-50 text-blue-700 border-blue-200',
+                        'diproses'      => 'bg-amber-50 text-amber-700 border-amber-200',
+                        'didisposisikan'=> 'bg-purple-50 text-purple-700 border-purple-200',
+                        'selesai'       => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                        'diarsipkan'    => 'bg-slate-100 text-slate-700 border-slate-200',
+                        default         => 'bg-slate-100 text-slate-600 border-slate-200'
                     };
                 @endphp
                 <div class="p-4 space-y-3">
@@ -165,7 +176,7 @@
             @endforelse
         </div>
 
-        <!-- VIEW DESKTOP (Tampil di Tablet/Laptop/Desktop / layar >= md) -->
+        <!-- VIEW DESKTOP (Layar >= md) -->
         <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-sm text-left border-collapse">
                 <thead>
@@ -182,68 +193,68 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($suratMasuks as $s)
-                    <tr class="hover:bg-slate-50/80 transition duration-150">
-                        <td class="px-5 py-4 font-bold text-blue-600 whitespace-nowrap">#{{ $s->nomor_agenda }}</td>
-                        <td class="px-5 py-4 font-semibold text-slate-800 whitespace-nowrap">{{ $s->nomor_surat }}</td>
-                        <td class="px-5 py-4 text-slate-500 whitespace-nowrap">{{ optional($s->tanggal_terima)->format('d/m/Y') ?? '-' }}</td>
-                        <td class="px-5 py-4 text-slate-700">
-                            <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium">
-                                {{ $s->instansi->nama_instansi ?? '-' }}
-                            </span>
-                        </td>
-                        <td class="px-5 py-4 text-slate-700 max-w-xs truncate font-medium" title="{{ $s->perihal }}">{{ $s->perihal }}</td>
-                        <td class="px-5 py-4 text-slate-500 whitespace-nowrap">{{ $s->kategori->nama_kategori ?? '-' }}</td>
-                        <td class="px-5 py-4 whitespace-nowrap">
-                            @php
-                                $badgeClass = match(strtolower($s->status ?? '')) {
-                                    'baru'           => 'bg-blue-50 text-blue-700 border-blue-200',
-                                    'diproses'       => 'bg-amber-50 text-amber-700 border-amber-200',
-                                    'didisposisikan' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                    'selesai'        => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                    'diarsipkan'     => 'bg-slate-100 text-slate-700 border-slate-200',
-                                    default          => 'bg-slate-100 text-slate-600 border-slate-200'
-                                };
-                            @endphp
-                            <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold border {{ $badgeClass }}">
-                                {{ ucfirst($s->status ?? 'Baru') }}
-                            </span>
-                        </td>
-                        <td class="px-5 py-4 text-center whitespace-nowrap">
-                            <div class="inline-flex items-center gap-1">
-                                <a href="{{ route('surat-masuk.show', $s) }}" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Lihat Detail">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </a>
-                                <a href="{{ route('surat-masuk.edit', $s) }}" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Ubah Data">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                </a>
-                                <a href="{{ route('disposisi.create', $s) }}" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Buat Disposisi">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-                                </a>
-                                <form action="{{ route('surat-masuk.destroy', $s) }}" method="POST" class="inline">
-                                    @csrf 
-                                    @method('DELETE')
-                                    <button type="button" 
-                                            onclick="confirmDelete(event, 'Surat Masuk {{ $s->nomor_surat }} akan dihapus secara permanen!')" 
-                                            class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" 
-                                            title="Hapus Surat">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="8" class="text-center py-12">
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                        @php
+                            $badgeClass = match(strtolower($s->status ?? '')) {
+                                'baru'          => 'bg-blue-50 text-blue-700 border-blue-200',
+                                'diproses'      => 'bg-amber-50 text-amber-700 border-amber-200',
+                                'didisposisikan'=> 'bg-purple-50 text-purple-700 border-purple-200',
+                                'selesai'       => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                'diarsipkan'    => 'bg-slate-100 text-slate-700 border-slate-200',
+                                default         => 'bg-slate-100 text-slate-600 border-slate-200'
+                            };
+                        @endphp
+                        <tr class="hover:bg-slate-50/80 transition duration-150">
+                            <td class="px-5 py-4 font-bold text-blue-600 whitespace-nowrap">#{{ $s->nomor_agenda }}</td>
+                            <td class="px-5 py-4 font-semibold text-slate-800 whitespace-nowrap">{{ $s->nomor_surat }}</td>
+                            <td class="px-5 py-4 text-slate-500 whitespace-nowrap">{{ optional($s->tanggal_terima)->format('d/m/Y') ?? '-' }}</td>
+                            <td class="px-5 py-4 text-slate-700">
+                                <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium">
+                                    {{ $s->instansi->nama_instansi ?? '-' }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 text-slate-700 max-w-xs truncate font-medium" title="{{ $s->perihal }}">{{ $s->perihal }}</td>
+                            <td class="px-5 py-4 text-slate-500 whitespace-nowrap">{{ $s->kategori->nama_kategori ?? '-' }}</td>
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold border {{ $badgeClass }}">
+                                    {{ ucfirst($s->status ?? 'Baru') }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1">
+                                    <a href="{{ route('surat-masuk.show', $s) }}" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Lihat Detail">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </a>
+                                    <a href="{{ route('surat-masuk.edit', $s) }}" class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Ubah Data">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </a>
+                                    <a href="{{ route('disposisi.create', $s) }}" class="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Buat Disposisi">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                    </a>
+                                    <form action="{{ route('surat-masuk.destroy', $s) }}" method="POST" class="inline">
+                                        @csrf 
+                                        @method('DELETE')
+                                        <button type="button" 
+                                                onclick="confirmDelete(event, 'Surat Masuk {{ $s->nomor_surat }} akan dihapus secara permanen!')" 
+                                                class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" 
+                                                title="Hapus Surat">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </form>
                                 </div>
-                                <p class="text-slate-700 font-semibold text-base">Belum ada data surat masuk</p>
-                                <p class="text-slate-400 text-xs mt-1">Coba sesuaikan pencarian/filter Anda atau catat surat baru.</p>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="text-center py-12">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                                    </div>
+                                    <p class="text-slate-700 font-semibold text-base">Belum ada data surat masuk</p>
+                                    <p class="text-slate-400 text-xs mt-1">Coba sesuaikan pencarian/filter Anda atau catat surat baru.</p>
+                                </div>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -258,4 +269,33 @@
     </div>
 
 </div>
+
+<!-- JAVASCRIPT UNTUK CONFIRM DELETE -->
+<script>
+    function confirmDelete(event, message) {
+        event.preventDefault();
+        const form = event.target.closest('form');
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        } else {
+            if (confirm(message)) {
+                form.submit();
+            }
+        }
+    }
+</script>
 @endsection

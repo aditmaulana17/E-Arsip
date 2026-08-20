@@ -55,7 +55,12 @@ class SuratMasukController extends Controller
         // Upload file lampiran jika ada
         if ($request->hasFile('lampiran_file')) {
             $file = $request->file('lampiran_file');
-            $filename = 'surat_' . time() . '_' . preg_replace('/[^A-Za-z0-9\.\-_]/', '_', $file->getClientOriginalName());
+            // Sanitasi nama file yang lebih bersih dan aman
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
+            $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
+
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
@@ -99,11 +104,17 @@ class SuratMasukController extends Controller
 
         // Ganti file lampiran lama jika mengunggah file baru
         if ($request->hasFile('lampiran_file')) {
-            if ($suratMasuk->lampiran_file && Storage::disk('public')->exists($suratMasuk->lampiran_file)) {
-                Storage::disk('public')->delete($suratMasuk->lampiran_file);
+            $oldPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
             }
+
             $file = $request->file('lampiran_file');
-            $filename = 'surat_' . time() . '_' . preg_replace('/[^A-Za-z0-9\.\-_]/', '_', $file->getClientOriginalName());
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
+            $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
+
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
@@ -143,9 +154,11 @@ class SuratMasukController extends Controller
         return view('surat_masuk.label', compact('suratMasuk'));
     }
 
-   public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
+    /**
+     * Preview lampiran dokumen (PDF / Gambar) langsung di browser / HP.
+     */
+    public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
     {
-        // Fleksibilitas pengecekan nama kolom
         $fileRelativePath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
 
         if (!$fileRelativePath || !Storage::disk('public')->exists($fileRelativePath)) {
@@ -153,14 +166,28 @@ class SuratMasukController extends Controller
         }
 
         $filePath = Storage::disk('public')->path($fileRelativePath);
-        
-        // Menggunakan helper native PHP untuk menghindari error/warning pada VS Code Intelephense
         $mimeType = mime_content_type($filePath) ?: 'application/octet-stream';
 
         return response()->file($filePath, [
             'Content-Type'        => $mimeType,
             'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
         ]);
+    }
+
+    /**
+     * Mengunduh lampiran secara langsung (Direct Download).
+     */
+    public function downloadLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
+    {
+        $fileRelativePath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
+
+        if (!$fileRelativePath || !Storage::disk('public')->exists($fileRelativePath)) {
+            abort(404, 'File lampiran tidak ditemukan untuk diunduh.');
+        }
+
+        $filePath = Storage::disk('public')->path($fileRelativePath);
+
+        return response()->download($filePath, basename($filePath));
     }
 
     /**

@@ -71,7 +71,7 @@
                         <!-- Tanggal Surat -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Tanggal Surat <span class="text-rose-500">*</span></label>
-                            <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat', is_string($suratMasuk->tanggal_surat) ? $suratMasuk->tanggal_surat : optional($suratMasuk->tanggal_surat)->format('Y-m-d')) }}" required
+                            <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat', $suratMasuk->tanggal_surat instanceof \Carbon\Carbon ? $suratMasuk->tanggal_surat->format('Y-m-d') : $suratMasuk->tanggal_surat) }}" required
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('tanggal_surat') border-rose-500 bg-rose-50/30 @enderror">
                             @error('tanggal_surat') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
@@ -79,7 +79,7 @@
                         <!-- Tanggal Diterima -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Tanggal Diterima <span class="text-rose-500">*</span></label>
-                            <input type="date" name="tanggal_terima" value="{{ old('tanggal_terima', is_string($suratMasuk->tanggal_terima) ? $suratMasuk->tanggal_terima : optional($suratMasuk->tanggal_terima)->format('Y-m-d')) }}" required
+                            <input type="date" name="tanggal_terima" value="{{ old('tanggal_terima', $suratMasuk->tanggal_terima instanceof \Carbon\Carbon ? $suratMasuk->tanggal_terima->format('Y-m-d') : $suratMasuk->tanggal_terima) }}" required
                                 class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('tanggal_terima') border-rose-500 bg-rose-50/30 @enderror">
                             @error('tanggal_terima') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
@@ -138,7 +138,7 @@
                                 @endif
                             </div>
                             
-                            <!-- Input File Dual Mode (Laptop File Manager / HP Camera & Gallery) -->
+                            <!-- Input File Dual Mode -->
                             <div class="relative">
                                 <input type="file" name="lampiran" accept=".pdf,image/*" id="lampiranFile"
                                     class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl cursor-pointer bg-slate-50/50">
@@ -191,7 +191,7 @@
 
 <!-- Script Validasi Ukuran File, Multi-Format Preview & Prevent Double Submit -->
 <script>
-    document.getElementById('lampiranFile').addEventListener('change', function(event) {
+    document.getElementById('lampiranFile')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
         const previewContainer = document.getElementById('previewContainer');
         const imagePreview = document.getElementById('imagePreview');
@@ -233,11 +233,13 @@
     });
 
     // Mencegah double submit saat form dikirim
-    document.getElementById('formEditSuratMasuk').addEventListener('submit', function() {
+    document.getElementById('formEditSuratMasuk')?.addEventListener('submit', function() {
         const btn = document.getElementById('btnSubmit');
-        btn.disabled = true;
-        btn.classList.add('opacity-75', 'cursor-not-allowed');
-        btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memperbarui...`;
+        if(btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memperbarui...`;
+        }
     });
 </script>
 @endsection
