@@ -66,7 +66,7 @@ class SuratMasukController extends Controller
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
-        // Eksekusi penyimpanan dengan mekanisme proteksi transaksi DB & auto-retry jika bentrok nomor agenda
+        // Eksekusi penyimpanan dengan transaksi DB & auto-retry jika nomor agenda bentrok
         try {
             $surat = DB::transaction(function () use ($data) {
                 if (empty($data['nomor_agenda']) || SuratMasuk::withTrashed()->where('nomor_agenda', $data['nomor_agenda'])->exists()) {
@@ -75,12 +75,10 @@ class SuratMasukController extends Controller
                 return SuratMasuk::create($data);
             });
         } catch (UniqueConstraintViolationException $e) {
-            // Jika terjadi race condition, paksa re-generate nomor agenda
             $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
             $surat = SuratMasuk::create($data);
         }
 
-        // Catat Log Aktivitas
         ActivityLog::catat('create', 'surat_masuk', "Menambah surat masuk {$surat->nomor_agenda} - {$surat->perihal}");
 
         return redirect()
@@ -134,7 +132,6 @@ class SuratMasukController extends Controller
 
         $suratMasuk->update($data);
 
-        // Catat Log Aktivitas
         ActivityLog::catat('update', 'surat_masuk', "Mengubah surat masuk {$suratMasuk->nomor_agenda}");
 
         return redirect()
@@ -159,7 +156,7 @@ class SuratMasukController extends Controller
     }
 
     /**
-     * Mengunggah lampiran berkas / scan dokumen dari halaman Detail Surat Masuk.
+     * Mengunggah lampiran berkas / hasil scan kamera dari halaman Detail.
      */
     public function uploadLampiran(Request $request, SuratMasuk $suratMasuk): RedirectResponse
     {
@@ -168,6 +165,7 @@ class SuratMasukController extends Controller
         ]);
 
         if ($request->hasFile('lampiran_file')) {
+            // Hapus file lama jika ada
             $oldPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
             if ($oldPath && Storage::disk('public')->exists($oldPath)) {
                 Storage::disk('public')->delete($oldPath);
@@ -181,9 +179,13 @@ class SuratMasukController extends Controller
 
             $path = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
 
-            $suratMasuk->update([
-                'lampiran_file' => $path
-            ]);
+            // Update record di DB (mendukung kompatibilitas kolom lampiran_file / lampiran)
+            $updateData = ['lampiran_file' => $path];
+            if (array_key_exists('lampiran', $suratMasuk->getAttributes())) {
+                $updateData['lampiran'] = $path;
+            }
+
+            $suratMasuk->update($updateData);
 
             ActivityLog::catat('update', 'surat_masuk', "Mengunggah lampiran surat masuk {$suratMasuk->nomor_agenda}");
         }
@@ -202,7 +204,7 @@ class SuratMasukController extends Controller
     }
 
     /**
-     * Preview lampiran dokumen (PDF / Gambar) langsung di browser / HP.
+     * Preview lampiran dokumen (PDF / Gambar) langsung di browser.
      */
     public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
     {
