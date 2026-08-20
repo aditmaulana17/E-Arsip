@@ -31,8 +31,12 @@ WORKDIR /var/www/html
 # 5. Copy seluruh file project
 COPY . .
 
-# 6. Install dependensi PHP (Composer) & Frontend (NPM Build)
-RUN composer install --optimize-autoloader --no-dev --no-interaction
+# 6. PERBAIKAN: Atur Konfigurasi Composer (Cegah Error HTTP 504 Timeout)
+RUN composer config --global process-timeout 2000 \
+    && composer config --global max-parallel-downloads 2 \
+    && composer install --optimize-autoloader --no-dev --no-interaction --prefer-source
+
+# Build Frontend (NPM)
 RUN npm install && npm run build
 
 # Berikan permission untuk storage dan bootstrap/cache (Laravel)
@@ -47,7 +51,7 @@ RUN echo "server {" > /etc/nginx/sites-available/default && \
     echo "    root /var/www/html/public;" >> /etc/nginx/sites-available/default && \
     echo "    location ~ \.php$ {" >> /etc/nginx/sites-available/default && \
     echo "        try_files \$uri =404;" >> /etc/nginx/sites-available/default && \
-    echo "        fastcgi_split_path_info ^(.+\.php)(/.+)$; " >> /etc/nginx/sites-available/default && \
+    echo "        fastcgi_split_path_info ^(.+\.php)(/.+)\$; " >> /etc/nginx/sites-available/default && \
     echo "        fastcgi_pass 127.0.0.1:9000;" >> /etc/nginx/sites-available/default && \
     echo "        fastcgi_index index.php;" >> /etc/nginx/sites-available/default && \
     echo "        include fastcgi_params;" >> /etc/nginx/sites-available/default && \
