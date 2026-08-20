@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[1/4] Menyiapkan Folder & SQLite..."
+echo "[1/4] Menyiapkan Folder Storage & SQLite..."
 mkdir -p /var/www/html/database
 mkdir -p /var/www/html/storage/framework/{sessions,views,cache}
 mkdir -p /var/www/html/storage/app/public
@@ -14,13 +14,14 @@ fi
 chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod 666 /var/www/html/database/database.sqlite
 
-echo "[2/4] Menyiapkan Konfigurasi Nginx..."
-PORT_TO_USE="${PORT:-8080}"
+# Mengambil PORT bawaan Railway, jika tidak ada baru gunakan 8080
+RAILWAY_PORT="${PORT:-8080}"
+echo "[2/4] Mengatur Nginx pada Port: ${RAILWAY_PORT}"
 
 cat <<EOF > /etc/nginx/conf.d/laravel.conf
 server {
-    listen ${PORT_TO_USE};
-    listen [::]:${PORT_TO_USE};
+    listen ${RAILWAY_PORT};
+    listen [::]:${RAILWAY_PORT};
     server_name _;
     root /var/www/html/public;
 
@@ -43,10 +44,10 @@ server {
 }
 EOF
 
-echo "[3/4] Memulai Layanan PHP-FPM..."
+echo "[3/4] Memulai PHP-FPM..."
 php-fpm -D
 
-echo "[4/4] Menjalankan Task Laravel & Nginx..."
+echo "[4/4] Menjalankan Optimasi Laravel & Nginx..."
 php artisan storage:link --force || true
 php artisan migrate --force || true
 php artisan config:clear || true
