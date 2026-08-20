@@ -55,7 +55,7 @@ class SuratMasukController extends Controller
         // Upload file lampiran jika ada
         if ($request->hasFile('lampiran_file')) {
             $file = $request->file('lampiran_file');
-            $filename = 'surat_' . time() . '_' . $file->getClientOriginalName();
+            $filename = 'surat_' . time() . '_' . preg_replace('/[^A-Za-z0-9\.\-_]/', '_', $file->getClientOriginalName());
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
@@ -103,7 +103,7 @@ class SuratMasukController extends Controller
                 Storage::disk('public')->delete($suratMasuk->lampiran_file);
             }
             $file = $request->file('lampiran_file');
-            $filename = 'surat_' . time() . '_' . $file->getClientOriginalName();
+            $filename = 'surat_' . time() . '_' . preg_replace('/[^A-Za-z0-9\.\-_]/', '_', $file->getClientOriginalName());
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
@@ -144,19 +144,20 @@ class SuratMasukController extends Controller
     }
 
     /**
-     * Stream/Preview file lampiran secara langsung.
+     * Stream/Preview file lampiran berdasarkan Model Binding (Menghindari 403 & Path Decoding Error).
      */
-    public function previewLampiran(string $path): BinaryFileResponse
+    public function previewLampiran(SuratMasuk $suratMasuk): BinaryFileResponse
     {
-        $decodedPath = urldecode($path);
-
-        if (!Storage::disk('public')->exists($decodedPath)) {
+        if (!$suratMasuk->lampiran_file || !Storage::disk('public')->exists($suratMasuk->lampiran_file)) {
             abort(404, 'File lampiran tidak ditemukan di server.');
         }
 
-        $filePath = Storage::disk('public')->path($decodedPath);
+        $filePath = Storage::disk('public')->path($suratMasuk->lampiran_file);
 
-        return response()->file($filePath);
+        return response()->file($filePath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+        ]);
     }
 
     /**

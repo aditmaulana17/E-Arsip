@@ -52,47 +52,6 @@ Route::get('/link-storage', function () {
 });
 
 // --------------------------------------------------------------------------
-// Route Public (Dapat Diakses Viewer / Tanpa Middleware Auth)
-// --------------------------------------------------------------------------
-Route::get('lampiran/preview/{path}', function ($path) {
-    try {
-        $cleanPath = preg_replace('/^(storage\/|public\/)/', '', $path);
-        $disk = Storage::disk('public');
-
-        $pathsToTry = [
-            $cleanPath,
-            $path,
-            'lampiran/surat_masuk/' . basename($cleanPath),
-            'lampiran/surat_keluar/' . basename($cleanPath)
-        ];
-
-        foreach ($pathsToTry as $tryPath) {
-            if ($disk->exists($tryPath)) {
-                $fullPath = $disk->path($tryPath);
-                $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/pdf';
-
-                return response($disk->get($tryPath), 200)
-                    ->header('Content-Type', $mimeType)
-                    ->header('Access-Control-Allow-Origin', '*');
-            }
-        }
-
-        if (Storage::exists($cleanPath)) {
-            $fullPath = Storage::path($cleanPath);
-            $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/pdf';
-
-            return response(Storage::get($cleanPath), 200)
-                ->header('Content-Type', $mimeType)
-                ->header('Access-Control-Allow-Origin', '*');
-        }
-
-        abort(404, 'File lampiran tidak ditemukan.');
-    } catch (\Exception $e) {
-        abort(500, 'Gagal memuat file lampiran.');
-    }
-})->where('path', '.*')->name('lampiran.preview');
-
-// --------------------------------------------------------------------------
 // Auth Guest Routes (Tamu / Belum Login)
 // --------------------------------------------------------------------------
 Route::middleware('guest')->group(function () {
@@ -115,6 +74,8 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- SURAT MASUK ---
+    // (Route khusus ditaruh DI ATAS Route::resource agar tidak tertimpa)
+    Route::get('surat-masuk/{suratMasuk}/preview', [SuratMasukController::class, 'previewLampiran'])->name('surat-masuk.preview');
     Route::get('surat-masuk/{suratMasuk}/label', [SuratMasukController::class, 'cetakLabel'])->name('surat-masuk.label');
     Route::get('surat-masuk/{suratMasuk}/cetak-disposisi', [SuratMasukController::class, 'cetakDisposisi'])->name('surat-masuk.cetak-disposisi');
     Route::resource('surat-masuk', SuratMasukController::class);

@@ -111,7 +111,6 @@
 
             <!-- Lampiran Berkas Digital & Preview -->
             @php
-                // Cek nama kolom lampiran (lampiran / lampiran_file)
                 $lampiranPath = $suratMasuk->lampiran ?? $suratMasuk->lampiran_file;
             @endphp
 
@@ -124,8 +123,8 @@
                         $extLower = strtolower($extension);
                         $isImage = in_array($extLower, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
                         
-                        // Buat URL storage yang bersih & konsisten
-                        $fileUrl = asset('storage/' . $lampiranPath);
+                        // PERBAIKAN: Gunakan Route Controller untuk Menghindari Error 403 Forbidden
+                        $fileUrl = route('surat-masuk.preview', $suratMasuk->id);
                     @endphp
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -148,7 +147,7 @@
                             <img src="{{ $fileUrl }}" alt="Lampiran Surat" class="max-h-[500px] w-full object-contain rounded-lg">
                         @elseif($extLower === 'pdf')
                             <div class="space-y-2">
-                                <!-- Gunakan Native Iframe / Embed agar lancar di HP & PC tanpa Google Viewer -->
+                                <!-- Native Iframe yang mengambil stream langsung dari controller -->
                                 <iframe src="{{ $fileUrl }}" class="w-full h-[500px] rounded-lg border-0 min-h-[350px]"></iframe>
                                 <p class="text-[11px] text-slate-400 text-center italic">
                                     Dokumen tidak tampil di browser Anda? <a href="{{ $fileUrl }}" target="_blank" class="text-blue-600 underline font-semibold">Klik di sini untuk membuka / mengunduh langsung.</a>
