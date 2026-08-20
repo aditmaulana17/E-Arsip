@@ -7,8 +7,10 @@ use App\Models\ActivityLog;
 use App\Models\Instansi;
 use App\Models\KategoriSurat;
 use App\Models\SuratMasuk;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -49,13 +51,6 @@ class SuratMasukController extends Controller
     public function store(SuratMasukRequest $request)
     {
         $data = $request->validated();
-        
-        // Pengecekan agar nomor agenda yang dikirim dari form divalidasi atau di-generate ulang dengan aman
-        // Jika nomor agenda kosong atau sudah dipakai, generate ulang secara otomatis
-        if (empty($data['nomor_agenda']) || SuratMasuk::where('nomor_agenda', $data['nomor_agenda'])->exists()) {
-            $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
-        }
-        
         $data['diterima_oleh'] = Auth::id();
 
         // Upload file lampiran jika ada
@@ -69,7 +64,19 @@ class SuratMasukController extends Controller
             $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
-        $surat = SuratMasuk::create($data);
+        // Eksekusi penyimpanan dengan mekanisme proteksi transaksi DB & auto-retry jika bentrok nomor agenda
+        try {
+            $surat = DB::transaction(function () use ($data) {
+                if (empty($data['nomor_agenda']) || SuratMasuk::withTrashed()->where('nomor_agenda', $data['nomor_agenda'])->exists()) {
+                    $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
+                }
+                return SuratMasuk::create($data);
+            });
+        } catch (UniqueConstraintViolationException $e) {
+            // Jika tetap terjadi bentrok jaringan/race condition, paksa re-generate ulang
+            $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
+            $surat = SuratMasuk::create($data);
+        }
 
         // Catat Log Aktivitas
         ActivityLog::catat('create', 'surat_masuk', "Menambah surat masuk {$surat->nomor_agenda} - {$surat->perihal}");
