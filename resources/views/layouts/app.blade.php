@@ -12,9 +12,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS (Vite / CDN Fallback) -->
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+    <!-- Tailwind CSS & JS (Dynamic Safe Vite Loading) -->
+    @if (file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @elseif (file_exists(public_path('build/manifest.json')))
+        @php
+            $manifest = json_decode(file_get_contents(public_path('build/manifest.json')), true) ?? [];
+            $hasCss = isset($manifest['resources/css/app.css']);
+            $hasJs = isset($manifest['resources/js/app.js']);
+        @endphp
+
+        @if ($hasCss && $hasJs)
+            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @elseif ($hasCss)
+            @vite(['resources/css/app.css'])
+        @elseif ($hasJs)
+            @vite(['resources/js/app.js'])
+        @else
+            <script src="https://cdn.tailwindcss.com"></script>
+        @endif
     @else
         <script src="https://cdn.tailwindcss.com"></script>
     @endif
