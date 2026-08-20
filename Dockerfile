@@ -31,9 +31,8 @@ WORKDIR /var/www/html
 # 5. Copy seluruh file project
 COPY . .
 
-# 6. PERBAIKAN: Atur Konfigurasi Composer (Cegah Error HTTP 504 Timeout)
+# 6. PERBAIKAN: Konfigurasi Timeout Composer & Install Dependencies
 RUN composer config --global process-timeout 2000 \
-    && composer config --global max-parallel-downloads 2 \
     && composer install --optimize-autoloader --no-dev --no-interaction --prefer-source
 
 # Build Frontend (NPM)
