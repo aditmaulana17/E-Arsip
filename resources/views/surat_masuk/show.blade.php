@@ -109,29 +109,47 @@
                 </div>
             </dl>
 
-            <!-- Lampiran Berkas Digital & Preview -->
+            <!-- Lampiran Berkas Digital & Preview (Disempurnakan untuk Mobile & PC) -->
             <div class="pt-4 border-t border-slate-100 space-y-3">
                 <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Berkas Lampiran (Digital)</dt>
                 @if($suratMasuk->lampiran_file)
                     @php
                         $extension = pathinfo($suratMasuk->lampiran_file, PATHINFO_EXTENSION);
-                        $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'webp']);
+                        $extLower = strtolower($extension);
+                        $isImage = in_array($extLower, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
                         $fileUrl = route('lampiran.preview', $suratMasuk->lampiran_file);
                     @endphp
 
-                    <div class="flex flex-wrap items-center gap-3">
-                        <a href="{{ $fileUrl }}" target="_blank" class="inline-flex items-center gap-2 text-xs font-semibold bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl border border-blue-200/80 hover:bg-blue-100 transition shadow-sm">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Buka Tab Baru -->
+                        <a href="{{ $fileUrl }}" target="_blank" class="inline-flex items-center gap-2 text-xs font-semibold bg-blue-50 text-blue-600 px-4 py-2.5 rounded-xl border border-blue-200/80 hover:bg-blue-100 transition shadow-sm grow sm:grow-0 justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            <span>Buka Lampiran Sepenuhnya ({{ strtoupper($extension) }})</span>
+                            <span>Buka Dokumen ({{ strtoupper($extension) }})</span>
+                        </a>
+
+                        <!-- Download File -->
+                        <a href="{{ $fileUrl }}" download class="inline-flex items-center gap-2 text-xs font-semibold bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-200 transition grow sm:grow-0 justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>Unduh File</span>
                         </a>
                     </div>
 
-                    <!-- Embedded Preview jika format Gambar atau PDF -->
+                    <!-- Area Embed Preview -->
                     <div class="mt-3 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-2">
                         @if($isImage)
-                            <img src="{{ $fileUrl }}" alt="Lampiran Surat" class="max-h-96 w-auto mx-auto rounded-lg object-contain">
-                        @elseif(strtolower($extension) === 'pdf')
-                            <iframe src="{{ $fileUrl }}" class="w-full h-80 rounded-lg border-0"></iframe>
+                            <img src="{{ $fileUrl }}" alt="Lampiran Surat" class="max-h-96 w-full object-contain rounded-lg">
+                        @elseif($extLower === 'pdf')
+                            <div class="space-y-2">
+                                <!-- Menggunakan Google Docs Embedded Viewer agar responsive & terbaca di HP -->
+                                <iframe src="https://docs.google.com/viewer?url={{ urlencode($fileUrl) }}&embedded=true" class="w-full h-96 rounded-lg border-0 min-h-[350px]"></iframe>
+                                <p class="text-[11px] text-slate-400 text-center italic">
+                                    Dokumen tidak tampil? <a href="{{ $fileUrl }}" target="_blank" class="text-blue-600 underline font-semibold">Klik di sini untuk membuka langsung.</a>
+                                </p>
+                            </div>
+                        @else
+                            <div class="p-4 text-center text-xs text-slate-500">
+                                Format file ({{ strtoupper($extension) }}) tidak mendukung pratinjau langsung. Silakan unduh berkas di atas.
+                            </div>
                         @endif
                     </div>
                 @else
