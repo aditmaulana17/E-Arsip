@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "[1/4] Menyiapkan Folder Storage & SQLite..."
+echo "[1/5] Menyiapkan Folder Storage..."
 mkdir -p /var/www/html/database
 mkdir -p /var/www/html/storage/framework/{sessions,views,cache}
 mkdir -p /var/www/html/storage/app/public
@@ -11,12 +11,15 @@ if [ ! -f /var/www/html/database/database.sqlite ]; then
     touch /var/www/html/database/database.sqlite
 fi
 
-chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
-chmod 666 /var/www/html/database/database.sqlite
+# 2. Hapus symlink lama jika ada, lalu buat baru
+rm -rf /var/www/html/public/storage
+php artisan storage:link --force || true
 
-# Mengambil PORT bawaan Railway, jika tidak ada baru gunakan 8080
+# 3. Berikan akses baca-tulis penuh untuk Nginx & PHP
+chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+chown -R www-data:www-data /var/www/html/storage /var/www/html/public
+
 RAILWAY_PORT="${PORT:-8080}"
-echo "[2/4] Mengatur Nginx pada Port: ${RAILWAY_PORT}"
 
 cat <<EOF > /etc/nginx/conf.d/laravel.conf
 server {
@@ -32,6 +35,12 @@ server {
         gzip_static on;
     }
 
+    # Izinkan Nginx membaca file static di folder storage
+    location /storage/ {
+        alias /var/www/html/storage/app/public/;
+        try_files \$uri \$uri/ =404;
+    }
+
     location ~ \.php$ {
         try_files \$uri =404;
         fastcgi_split_path_info ^(.+\.php)(/.+)\$;
@@ -44,14 +53,10 @@ server {
 }
 EOF
 
-echo "[3/4] Memulai PHP-FPM..."
 php-fpm -D
 
-echo "[4/4] Menjalankan Optimasi Laravel & Nginx..."
-php artisan storage:link --force || true
 php artisan migrate --force || true
 php artisan config:clear || true
 php artisan route:clear || true
-php artisan view:clear || true
 
 exec nginx -g "daemon off;"
