@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -55,18 +56,18 @@ class SuratMasukController extends Controller
         $data = $request->validated();
         $data['diterima_oleh'] = Auth::id();
 
-        // Upload file lampiran jika ada
+        // Process file upload jika ada
         if ($request->hasFile('lampiran_file')) {
-            $file = $request->file('lampiran_file');
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $extension = $file->getClientOriginalExtension();
-            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
-            $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
-
-            $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
+            $path = $this->handleFileUpload($request->file('lampiran_file'));
+            $data['lampiran_file'] = $path;
+            
+            // Kompatibilitas dengan skema tabel lama/baru
+            if (array_key_exists('lampiran', (new SuratMasuk())->getAttributes())) {
+                $data['lampiran'] = $path;
+            }
         }
 
-        // Eksekusi penyimpanan dengan transaksi DB & auto-retry jika nomor agenda bentrok
+        // Simpan data dengan Transaksi DB & Auto-Retry untuk nomor agenda unik
         try {
             $surat = DB::transaction(function () use ($data) {
                 if (empty($data['nomor_agenda']) || SuratMasuk::withTrashed()->where('nomor_agenda', $data['nomor_agenda'])->exists()) {
@@ -77,6 +78,9 @@ class SuratMasukController extends Controller
         } catch (UniqueConstraintViolationException $e) {
             $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
             $surat = SuratMasuk::create($data);
+        } catch (\Exception $e) {
+            Log::error('Gagal menyimpan Surat Masuk: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menyimpan data surat masuk. Silakan coba lagi.');
         }
 
         ActivityLog::catat('create', 'surat_masuk', "Menambah surat masuk {$surat->nomor_agenda} - {$surat->perihal}");
@@ -116,23 +120,23 @@ class SuratMasukController extends Controller
 
         // Ganti file lampiran lama jika mengunggah file baru
         if ($request->hasFile('lampiran_file')) {
-            $oldPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
-            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+            $this->deleteOldFile($suratMasuk);
+            
+            $path = $this->handleFileUpload($request->file('lampiran_file'));
+            $data['lampiran_file'] = $path;
+
+            if (array_key_exists('lampiran', $suratMasuk->getAttributes())) {
+                $data['lampiran'] = $path;
             }
-
-            $file = $request->file('lampiran_file');
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $extension = $file->getClientOriginalExtension();
-            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
-            $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
-
-            $data['lampiran_file'] = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
         }
 
-        $suratMasuk->update($data);
-
-        ActivityLog::catat('update', 'surat_masuk', "Mengubah surat masuk {$suratMasuk->nomor_agenda}");
+        try {
+            $suratMasuk->update($data);
+            ActivityLog::catat('update', 'surat_masuk', "Mengubah surat masuk {$suratMasuk->nomor_agenda}");
+        } catch (\Exception $e) {
+            Log::error('Gagal memperbarui Surat Masuk: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Gagal memperbarui data surat masuk.');
+        }
 
         return redirect()
             ->route('surat-masuk.index')
@@ -146,9 +150,13 @@ class SuratMasukController extends Controller
     {
         $nomorAgenda = $suratMasuk->nomor_agenda;
         
-        $suratMasuk->delete();
-        
-        ActivityLog::catat('delete', 'surat_masuk', "Menghapus surat masuk {$nomorAgenda}");
+        try {
+            $suratMasuk->delete();
+            ActivityLog::catat('delete', 'surat_masuk', "Menghapus surat masuk {$nomorAgenda}");
+        } catch (\Exception $e) {
+            Log::error('Gagal menghapus Surat Masuk: ' . $e->getMessage());
+            return back()->with('error', 'Gagal menghapus surat masuk.');
+        }
 
         return redirect()
             ->route('surat-masuk.index')
@@ -156,30 +164,23 @@ class SuratMasukController extends Controller
     }
 
     /**
-     * Mengunggah lampiran berkas / hasil scan kamera dari halaman Detail.
+     * Mengunggah lampiran berkas / hasil scan kamera dari halaman Detail Modal.
      */
     public function uploadLampiran(Request $request, SuratMasuk $suratMasuk): RedirectResponse
     {
         $request->validate([
             'lampiran_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ], [
+            'lampiran_file.required' => 'Pilih berkas terlebih dahulu.',
+            'lampiran_file.mimes'    => 'Format berkas harus berupa PDF, JPG, JPEG, atau PNG.',
+            'lampiran_file.max'      => 'Ukuran berkas maksimal adalah 5MB.',
         ]);
 
         if ($request->hasFile('lampiran_file')) {
-            // Hapus file lama jika ada
-            $oldPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
-            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
-            }
+            $this->deleteOldFile($suratMasuk);
 
-            $file = $request->file('lampiran_file');
-            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $extension = $file->getClientOriginalExtension();
-            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
-            $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
+            $path = $this->handleFileUpload($request->file('lampiran_file'));
 
-            $path = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
-
-            // Update record di DB (mendukung kompatibilitas kolom lampiran_file / lampiran)
             $updateData = ['lampiran_file' => $path];
             if (array_key_exists('lampiran', $suratMasuk->getAttributes())) {
                 $updateData['lampiran'] = $path;
@@ -247,5 +248,29 @@ class SuratMasukController extends Controller
         $suratMasuk->load(['instansi', 'kategori', 'penerima', 'disposisi.dari', 'disposisi.kepada']);
 
         return view('surat_masuk.disposisi_pdf', compact('suratMasuk'));
+    }
+
+    /**
+     * Helper privat untuk penanganan upload file lampiran.
+     */
+    private function handleFileUpload($file): string
+    {
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
+        $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
+
+        return $file->storeAs('lampiran/surat_masuk', $filename, 'public');
+    }
+
+    /**
+     * Helper privat untuk menghapus berkas lama jika tersedia.
+     */
+    private function deleteOldFile(SuratMasuk $suratMasuk): void
+    {
+        $oldPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
     }
 }

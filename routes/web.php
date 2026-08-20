@@ -33,7 +33,7 @@ Route::get('/clear-cache', function () {
         'status'  => 'success',
         'message' => 'Semua cache view, route, dan sistem berhasil dibersihkan!'
     ]);
-});
+})->name('utility.clear-cache');
 
 Route::get('/link-storage', function () {
     try {
@@ -48,7 +48,7 @@ Route::get('/link-storage', function () {
             'message' => 'Gagal membuat symlink: ' . $e->getMessage()
         ], 500);
     }
-});
+})->name('utility.link-storage');
 
 // --------------------------------------------------------------------------
 // Auth Guest Routes (Tamu / Belum Login)
@@ -61,32 +61,33 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [RegisterController::class, 'register'])->name('register.attempt');
 });
 
-// Logout Route
-Route::post('logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
-
 // --------------------------------------------------------------------------
 // Auth Authenticated Routes (Sudah Login)
 // --------------------------------------------------------------------------
 Route::middleware('auth')->group(function () {
+
+    // Logout Route
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
     
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- SURAT MASUK ---
-    // Dipasang sebelum Route::resource agar tidak bertabrakan dengan {suratMasuk}
-    Route::get('surat-masuk/{suratMasuk}/preview', [SuratMasukController::class, 'previewLampiran'])->name('surat-masuk.preview');
-    Route::get('surat-masuk/{suratMasuk}/download', [SuratMasukController::class, 'downloadLampiran'])->name('surat-masuk.download');
-    Route::get('surat-masuk/{suratMasuk}/label', [SuratMasukController::class, 'cetakLabel'])->name('surat-masuk.label');
-    Route::get('surat-masuk/{suratMasuk}/cetak-disposisi', [SuratMasukController::class, 'cetakDisposisi'])->name('surat-masuk.cetak-disposisi');
-    
-    // Route untuk Handle Upload/Scan Lampiran dari Modal
-    Route::post('surat-masuk/{suratMasuk}/upload-lampiran', [SuratMasukController::class, 'uploadLampiran'])->name('surat-masuk.upload-lampiran');
-
+    // Custom Routes diletakkan sebelum Route::resource
+    Route::prefix('surat-masuk')->name('surat-masuk.')->group(function () {
+        Route::get('{suratMasuk}/preview', [SuratMasukController::class, 'previewLampiran'])->name('preview');
+        Route::get('{suratMasuk}/download', [SuratMasukController::class, 'downloadLampiran'])->name('download');
+        Route::get('{suratMasuk}/label', [SuratMasukController::class, 'cetakLabel'])->name('label');
+        Route::get('{suratMasuk}/cetak-disposisi', [SuratMasukController::class, 'cetakDisposisi'])->name('cetak-disposisi');
+        Route::post('{suratMasuk}/upload-lampiran', [SuratMasukController::class, 'uploadLampiran'])->name('upload-lampiran');
+    });
     Route::resource('surat-masuk', SuratMasukController::class);
 
     // --- SURAT KELUAR ---
-    Route::get('surat-keluar/{suratKeluar}/preview', [SuratKeluarController::class, 'previewLampiran'])->name('surat-keluar.preview');
-    Route::get('surat-keluar/{suratKeluar}/download', [SuratKeluarController::class, 'downloadLampiran'])->name('surat-keluar.download');
+    Route::prefix('surat-keluar')->name('surat-keluar.')->group(function () {
+        Route::get('{suratKeluar}/preview', [SuratKeluarController::class, 'previewLampiran'])->name('preview');
+        Route::get('{suratKeluar}/download', [SuratKeluarController::class, 'downloadLampiran'])->name('download');
+    });
     Route::resource('surat-keluar', SuratKeluarController::class);
 
     // --- DISPOSISI ---

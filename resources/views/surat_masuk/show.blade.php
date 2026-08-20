@@ -38,6 +38,22 @@
         </div>
     </div>
 
+    <!-- ALERT NOTIFIKASI SUCCESS / ERROR -->
+    @if(session('success'))
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold flex items-center gap-2">
+            <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-semibold space-y-1">
+            @foreach($errors->all() as $error)
+                <p>&bull; {{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- MAIN PANEL: INFORMASI UTAMA SURAT MASUK -->
@@ -109,13 +125,21 @@
                 </div>
             </dl>
 
-            <!-- BERKAS LAMPIRAN (FITUR LIHAT & PREVIEW SURAT) -->
+            <!-- BERKAS LAMPIRAN (FITUR UNGGAH, PREVIEW, & LIHAT SURAT) -->
             @php
                 $filePath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran ?? null;
             @endphp
 
             <div class="pt-4 border-t border-slate-100 space-y-3">
-                <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Berkas Lampiran (Digital)</dt>
+                <div class="flex items-center justify-between">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Berkas Lampiran (Digital)</dt>
+                    @if($filePath)
+                        <button type="button" onclick="document.getElementById('modalUpload').classList.remove('hidden')" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            <span>Ganti Berkas</span>
+                        </button>
+                    @endif
+                </div>
 
                 @if($filePath)
                     @php
@@ -151,8 +175,16 @@
                         @endif
                     </div>
                 @else
-                    <div class="p-4 rounded-xl border border-slate-100 bg-slate-50 text-center">
-                        <p class="text-xs text-slate-400 italic">Tidak ada lampiran berkas digital yang diunggah untuk surat ini.</p>
+                    <!-- Tampilan Box Saat Belum Ada Berkas + Tombol Modal Unggah -->
+                    <div class="p-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 text-center space-y-3">
+                        <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">Tidak ada lampiran berkas digital yang diunggah untuk surat ini.</p>
+                        <button type="button" onclick="document.getElementById('modalUpload').classList.remove('hidden')" class="inline-flex items-center gap-2 text-xs font-semibold bg-blue-600 text-white px-4 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            <span>Unggah Lampiran / Scan</span>
+                        </button>
                     </div>
                 @endif
             </div>
@@ -197,5 +229,30 @@
 
     </div>
 
+</div>
+
+<!-- MODAL POPUP UNGGAH / SCAN BERKAS -->
+<div id="modalUpload" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+            <h3 class="font-bold text-slate-800 text-base">Unggah Berkas Lampiran</h3>
+            <button type="button" onclick="document.getElementById('modalUpload').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <form action="{{ route('surat-masuk.upload-lampiran', $suratMasuk) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-2">Pilih File (PDF, JPG, PNG - Maks. 5MB)</label>
+                <input type="file" name="lampiran_file" accept=".pdf,.jpg,.jpeg,.png" required class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl">
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="document.getElementById('modalUpload').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Batal</button>
+                <button type="submit" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition shadow-sm">Simpan Lampiran</button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
