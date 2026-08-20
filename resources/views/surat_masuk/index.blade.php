@@ -3,33 +3,33 @@
 @section('title', 'Surat Masuk')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
 
     <!-- HEADER & BARIS TOMBOL AKSI -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Surat Masuk</h1>
-            <p class="text-sm text-slate-500 mt-0.5">Kelola dan pantau seluruh arsip surat masuk organisasi Anda.</p>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Surat Masuk</h1>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Kelola dan pantau seluruh arsip surat masuk organisasi Anda.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
             <!-- Export Excel -->
             <a href="{{ route('export.surat-masuk.excel', request()->query()) }}" 
-               class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-200 shadow-sm">
+               class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl transition-all border border-emerald-200 shadow-sm">
                 <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span>Excel</span>
             </a>
 
             <!-- Export PDF -->
             <a href="{{ route('export.surat-masuk.pdf', request()->query()) }}" target="_blank"
-               class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl transition-all border border-rose-200 shadow-sm">
+               class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl transition-all border border-rose-200 shadow-sm">
                 <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                 <span>PDF</span>
             </a>
 
             <!-- Catat Surat Masuk -->
             <a href="{{ route('surat-masuk.create') }}" 
-               class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-all shadow-md shadow-blue-600/30">
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 rounded-xl transition-all shadow-md shadow-blue-600/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span>Catat Surat Masuk</span>
             </a>
@@ -37,7 +37,7 @@
     </div>
 
     <!-- FILTER SECTION -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5">
         <form method="GET" action="{{ route('surat-masuk.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
             
             <!-- Input Pencarian -->
@@ -79,9 +79,10 @@
             </div>
 
             <!-- Tombol Submit Filter & Reset -->
-            <div class="lg:col-span-1 flex gap-1.5">
-                <button type="submit" title="Terapkan Filter" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-2.5 rounded-xl text-sm font-semibold shadow-sm transition flex items-center justify-center">
+            <div class="lg:col-span-1 flex gap-2">
+                <button type="submit" title="Terapkan Filter" class="flex-1 lg:flex-none w-full bg-slate-900 hover:bg-slate-800 text-white p-2.5 rounded-xl text-sm font-semibold shadow-sm transition flex items-center justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    <span class="sm:hidden ml-2">Filter</span>
                 </button>
                 
                 @if(request()->anyFilled(['search', 'kategori_id', 'status', 'dari_tanggal']))
@@ -94,9 +95,78 @@
         </form>
     </div>
 
-    <!-- TABEL DATA -->
+    <!-- WRAPPER DATA (TABEL DESKTOP & KARTU MOBILE) -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-        <div class="overflow-x-auto">
+        
+        <!-- VIEW MOBILE (Hanya tampil di HP / layar < md) -->
+        <div class="block md:hidden divide-y divide-slate-100">
+            @forelse($suratMasuks as $s)
+                @php
+                    $badgeClass = match(strtolower($s->status ?? '')) {
+                        'baru'           => 'bg-blue-50 text-blue-700 border-blue-200',
+                        'diproses'       => 'bg-amber-50 text-amber-700 border-amber-200',
+                        'didisposisikan' => 'bg-purple-50 text-purple-700 border-purple-200',
+                        'selesai'        => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                        'diarsipkan'     => 'bg-slate-100 text-slate-700 border-slate-200',
+                        default          => 'bg-slate-100 text-slate-600 border-slate-200'
+                    };
+                @endphp
+                <div class="p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="font-bold text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">#{{ $s->nomor_agenda }}</span>
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border {{ $badgeClass }}">
+                            {{ ucfirst($s->status ?? 'Baru') }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <div class="text-xs text-slate-400 font-medium">{{ optional($s->tanggal_terima)->format('d/m/Y') ?? '-' }}</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">{{ $s->nomor_surat }}</h3>
+                        <p class="text-xs text-slate-600 mt-1 line-clamp-2">{{ $s->perihal }}</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 text-xs pt-1 border-t border-slate-100">
+                        <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded-md font-medium">
+                            {{ $s->instansi->nama_instansi ?? '-' }}
+                        </span>
+                        <span class="px-2 py-1 bg-slate-50 text-slate-500 rounded-md border border-slate-100">
+                            {{ $s->kategori->nama_kategori ?? '-' }}
+                        </span>
+                    </div>
+
+                    <!-- Tombol Aksi Mobile -->
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                        <a href="{{ route('surat-masuk.show', $s) }}" class="flex-1 py-1.5 px-3 bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs text-center font-medium rounded-lg border border-slate-200 transition">
+                            Detail
+                        </a>
+                        <a href="{{ route('surat-masuk.edit', $s) }}" class="p-1.5 text-slate-500 hover:text-amber-600 bg-slate-50 rounded-lg border border-slate-200" title="Ubah Data">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </a>
+                        <a href="{{ route('disposisi.create', $s) }}" class="p-1.5 text-slate-500 hover:text-purple-600 bg-slate-50 rounded-lg border border-slate-200" title="Buat Disposisi">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                        </a>
+                        <form action="{{ route('surat-masuk.destroy', $s) }}" method="POST" class="inline">
+                            @csrf 
+                            @method('DELETE')
+                            <button type="button" 
+                                    onclick="confirmDelete(event, 'Surat Masuk {{ $s->nomor_surat }} akan dihapus secara permanen!')" 
+                                    class="p-1.5 text-slate-500 hover:text-rose-600 bg-slate-50 rounded-lg border border-slate-200" 
+                                    title="Hapus Surat">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-10 px-4">
+                    <p class="text-slate-700 font-semibold text-sm">Belum ada data surat masuk</p>
+                    <p class="text-slate-400 text-xs mt-1">Coba sesuaikan pencarian/filter Anda atau catat surat baru.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- VIEW DESKTOP (Tampil di Tablet/Laptop/Desktop / layar >= md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-sm text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -181,7 +251,7 @@
 
         <!-- PAGINATION FOOTER -->
         @if(isset($suratMasuks) && method_exists($suratMasuks, 'hasPages') && $suratMasuks->hasPages())
-            <div class="px-5 py-4 border-t border-slate-100">
+            <div class="px-4 py-3 sm:px-5 sm:py-4 border-t border-slate-100">
                 {{ $suratMasuks->withQueryString()->links() }}
             </div>
         @endif
