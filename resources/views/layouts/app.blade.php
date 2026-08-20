@@ -127,10 +127,27 @@
 
             <!-- Main Content Area -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-                <!-- Flash Messages -->
+                
+                <!-- Single Flash Message dengan Timer Auto-Dismiss 3 Detik -->
                 @if (session('success'))
-                    <div class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between">
-                        <span>{{ session('success') }}</span>
+                    <div x-data="{ show: true }" 
+                         x-show="show" 
+                         x-init="setTimeout(() => show = false, 3000)"
+                         x-transition:leave="transition ease-in duration-300 transform opacity-100 scale-100"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="mb-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-2.5">
+                            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ session('success') }}</span>
+                        </div>
+                        <button @click="show = false" class="text-emerald-500 hover:text-emerald-800 p-1 rounded-lg transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
                     </div>
                 @endif
 
@@ -139,7 +156,7 @@
         </div>
     </div>
 
-    <!-- Alpine.js untuk penanganan interaksi UI sederhana -->
+    <!-- Alpine.js untuk penanganan interaksi UI & Timer Notifikasi -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>

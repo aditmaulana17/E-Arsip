@@ -121,8 +121,10 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden flex flex-col h-full min-h-[620px]">
                 
                 @php
-                    $filePath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
+                    // Otomatis mengecek berbagai variasi nama kolom berkas
+                    $filePath = $suratMasuk->file_surat ?? $suratMasuk->lampiran_file ?? $suratMasuk->lampiran ?? $suratMasuk->file;
                     $fileExists = $filePath && \Illuminate\Support\Facades\Storage::disk('public')->exists($filePath);
+                    $fileUrl = $fileExists ? \Illuminate\Support\Facades\Storage::url($filePath) : null;
                 @endphp
 
                 <!-- Card Header Lampiran -->
@@ -137,38 +139,36 @@
                         </div>
                     </div>
 
-                    @if ($fileExists && Route::has('surat-masuk.preview'))
+                    @if ($fileExists)
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('surat-masuk.preview', $suratMasuk->id) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition">
+                            <a href="{{ $fileUrl }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                                 <span>Buka Tab Baru</span>
                             </a>
-                            @if(Route::has('surat-masuk.download'))
-                                <a href="{{ route('surat-masuk.download', $suratMasuk->id) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold shadow-sm transition">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                    <span>Unduh Berkas</span>
-                                </a>
-                            @endif
+                            <a href="{{ $fileUrl }}" download class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold shadow-sm transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Unduh Berkas</span>
+                            </a>
                         </div>
                     @endif
                 </div>
 
                 <!-- Body Document Viewer -->
                 <div class="flex-1 bg-slate-900/5 relative flex items-center justify-center min-h-[550px]">
-                    @if ($fileExists && Route::has('surat-masuk.preview'))
+                    @if ($fileExists)
                         @php
                             $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
                         @endphp
 
                         @if ($extension === 'pdf')
                             <iframe 
-                                src="{{ route('surat-masuk.preview', $suratMasuk->id) }}" 
+                                src="{{ $fileUrl }}" 
                                 class="w-full h-full min-h-[550px] border-0"
                                 title="Pratinjau PDF">
                             </iframe>
                         @elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'webp']))
                             <div class="p-4 text-center">
-                                <img src="{{ route('surat-masuk.preview', $suratMasuk->id) }}" 
+                                <img src="{{ $fileUrl }}" 
                                      alt="Lampiran Surat" 
                                      class="max-h-[520px] mx-auto rounded-xl shadow-lg border border-white object-contain">
                             </div>
@@ -179,12 +179,10 @@
                                 </div>
                                 <h3 class="text-slate-800 font-bold text-sm">Format Berkas (<code>.{{ $extension }}</code>)</h3>
                                 <p class="text-slate-500 text-xs mt-1 mb-4">Berkas ini tidak dapat ditayangkan langsung di halaman web.</p>
-                                @if(Route::has('surat-masuk.download'))
-                                    <a href="{{ route('surat-masuk.download', $suratMasuk->id) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs hover:bg-blue-700 transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 013 3h10a3 3 0 013-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                        <span>Unduh Dokumen Sekarang</span>
-                                    </a>
-                                @endif
+                                <a href="{{ $fileUrl }}" download class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs hover:bg-blue-700 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Unduh Dokumen Sekarang</span>
+                                </a>
                             </div>
                         @endif
                     @else
