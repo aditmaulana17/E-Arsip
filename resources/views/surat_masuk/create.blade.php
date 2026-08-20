@@ -16,7 +16,19 @@
         </a>
     </div>
 
-    <form method="POST" action="{{ route('surat-masuk.store') }}" enctype="multipart/form-data">
+    <!-- Menampilkan Alert Pesan Error jika Ada Validasi yang Gagal -->
+    @if ($errors->any())
+        <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl">
+            <p class="text-xs font-bold text-rose-700 uppercase tracking-wider mb-1">Gagal Menyimpan Surat:</p>
+            <ul class="list-disc list-inside text-xs text-rose-600 space-y-0.5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('surat-masuk.store') }}" enctype="multipart/form-data" id="formSuratMasuk">
         @csrf
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
@@ -47,7 +59,7 @@
                         <!-- Instansi Pengirim -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Instansi Pengirim <span class="text-rose-500">*</span></label>
-                            <select name="instansi_id" required class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium">
+                            <select name="instansi_id" required class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('instansi_id') border-rose-500 bg-rose-50/30 @enderror">
                                 <option value="" disabled selected>Pilih instansi</option>
                                 @foreach($instansis as $i)
                                     <option value="{{ $i->id }}" {{ old('instansi_id') == $i->id ? 'selected' : '' }}>{{ $i->nama_instansi }}</option>
@@ -60,7 +72,7 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Tanggal Surat <span class="text-rose-500">*</span></label>
                             <input type="date" name="tanggal_surat" value="{{ old('tanggal_surat') }}" required
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium">
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('tanggal_surat') border-rose-500 bg-rose-50/30 @enderror">
                             @error('tanggal_surat') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
 
@@ -68,14 +80,14 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Tanggal Diterima <span class="text-rose-500">*</span></label>
                             <input type="date" name="tanggal_terima" value="{{ old('tanggal_terima', date('Y-m-d')) }}" required
-                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium">
+                                class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('tanggal_terima') border-rose-500 bg-rose-50/30 @enderror">
                             @error('tanggal_terima') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                         </div>
 
                         <!-- Kategori Surat -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Kategori Surat <span class="text-rose-500">*</span></label>
-                            <select name="kategori_surat_id" required class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium">
+                            <select name="kategori_surat_id" required class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('kategori_surat_id') border-rose-500 bg-rose-50/30 @enderror">
                                 <option value="" disabled selected>Pilih kategori</option>
                                 @foreach($kategoris as $k)
                                     <option value="{{ $k->id }}" {{ old('kategori_surat_id') == $k->id ? 'selected' : '' }}>
@@ -89,8 +101,8 @@
                         <!-- Status -->
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Status <span class="text-rose-500">*</span></label>
-                            <select name="status" required class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium">
-                                <option value="baru" {{ old('status') == 'baru' ? 'selected' : '' }}>Baru</option>
+                            <select name="status" required class="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm text-slate-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition duration-150 font-medium @error('status') border-rose-500 bg-rose-50/30 @enderror">
+                                <option value="baru" {{ old('status', 'baru') == 'baru' ? 'selected' : '' }}>Baru</option>
                                 <option value="diproses" {{ old('status') == 'diproses' ? 'selected' : '' }}>Diproses</option>
                                 <option value="diarsipkan" {{ old('status') == 'diarsipkan' ? 'selected' : '' }}>Diarsipkan</option>
                             </select>
@@ -116,16 +128,22 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Scan / Lampiran <span class="text-slate-400 font-normal lowercase">(PDF / Gambar max 10MB)</span></label>
                             
-                            <!-- Input File dengan dukungan kamera langsung -->
-                            <input type="file" name="lampiran_file" accept=".pdf,image/*" capture="environment" id="lampiranFile"
-                                class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 border border-slate-200 rounded-xl cursor-pointer bg-slate-50/50">
+                            <!-- Input Kamera / File (Disesuaikan name-nya menjadi 'lampiran' agar cocok dengan Controller) -->
+                            <div class="flex items-center gap-2">
+                                <input type="file" name="lampiran" accept=".pdf,image/*" capture="environment" id="lampiranFile"
+                                    class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl cursor-pointer bg-slate-50/50">
+                                
+                                <button type="button" onclick="document.getElementById('lampiranFile').click()" class="inline-flex sm:hidden items-center justify-center p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-700 font-medium text-xs flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                </button>
+                            </div>
                             
-                            <small class="text-slate-400 text-[11px] mt-1 block">Tips: Buka via HP untuk langsung memotret fisik surat.</small>
-                            @error('lampiran_file') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
+                            <small class="text-slate-400 text-[11px] mt-1 block">Tips: Buka via HP untuk langsung ambil foto dokumen.</small>
+                            @error('lampiran') <p class="text-rose-500 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
 
                             <!-- Pratinjau Gambar Hasil Scan -->
                             <div class="mt-3" id="previewContainer" style="display: none;">
-                                <p class="text-xs font-semibold text-slate-600 mb-1">Pratinjau Hasil Scan:</p>
+                                <p class="text-xs font-semibold text-slate-600 mb-1">Pratinjau Hasil Foto/Scan:</p>
                                 <img id="imagePreview" src="#" alt="Preview" class="max-h-40 rounded-lg border border-slate-200 shadow-sm object-contain">
                             </div>
                         </div>
@@ -147,7 +165,7 @@
                 <a href="{{ route('surat-masuk.index') }}" class="w-full sm:w-auto text-center px-4 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-100 hover:text-slate-800 transition">
                     Batal
                 </a>
-                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/30 transition">
+                <button type="submit" id="btnSubmit" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/30 transition">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     Simpan Surat Masuk
                 </button>
@@ -157,7 +175,7 @@
     </form>
 </div>
 
-<!-- Script untuk Validasi Ukuran File & Menampilkan Preview Gambar -->
+<!-- Script untuk Validasi Ukuran File & Preview Gambar -->
 <script>
     document.getElementById('lampiranFile').addEventListener('change', function(event) {
         const file = event.target.files[0];
@@ -167,7 +185,7 @@
         if (file) {
             // Batasan maksimal 10MB (10 * 1024 * 1024 bytes)
             if (file.size > 10 * 1024 * 1024) {
-                alert('Ukuran file terlalu besar! Maksimal ukuran yang diizinkan adalah 10MB.');
+                alert('Ukuran file/foto terlalu besar! Maksimal ukuran adalah 10MB.');
                 this.value = '';
                 previewContainer.style.display = 'none';
                 return;
@@ -186,6 +204,14 @@
                 previewContainer.style.display = 'none';
             }
         }
+    });
+
+    // Mencegah Double Submit saat tombol ditekan
+    document.getElementById('formSuratMasuk').addEventListener('submit', function() {
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+        btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
     });
 </script>
 @endsection
