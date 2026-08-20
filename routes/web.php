@@ -73,8 +73,7 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Route Preview Lampiran File
-    // Route Preview Lampiran File
+    // Route Preview Lampiran File (Aman untuk Railway Volume & Google Viewer)
     Route::get('lampiran/preview/{path}', function ($path) {
         try {
             $cleanPath = preg_replace('/^(storage\/|public\/)/', '', $path);
@@ -90,16 +89,15 @@ Route::middleware('auth')->group(function () {
             foreach ($pathsToTry as $tryPath) {
                 if ($disk->exists($tryPath)) {
                     $fullPath = $disk->path($tryPath);
-                    $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/pdf';
+                    $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/octet-stream';
 
                     return response($disk->get($tryPath), 200)->header('Content-Type', $mimeType);
                 }
             }
 
-            // Fallback untuk storage default
             if (Storage::exists($cleanPath)) {
                 $fullPath = Storage::path($cleanPath);
-                $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/pdf';
+                $mimeType = file_exists($fullPath) ? mime_content_type($fullPath) : 'application/octet-stream';
 
                 return response(Storage::get($cleanPath), 200)->header('Content-Type', $mimeType);
             }
