@@ -7,7 +7,9 @@ use App\Models\ActivityLog;
 use App\Models\Instansi;
 use App\Models\KategoriSurat;
 use App\Models\SuratMasuk;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +21,7 @@ class SuratMasukController extends Controller
     /**
      * Menampilkan daftar Surat Masuk dengan filter dan pagination.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $suratMasuks = SuratMasuk::with(['instansi', 'kategori', 'penerima'])
             ->filter($request->only(['search', 'kategori_id', 'instansi_id', 'status', 'dari_tanggal', 'sampai_tanggal']))
@@ -36,7 +38,7 @@ class SuratMasukController extends Controller
     /**
      * Form pembuatan Surat Masuk baru.
      */
-    public function create()
+    public function create(): View
     {
         $kategoris = KategoriSurat::orderBy('nama_kategori')->get();
         $instansis = Instansi::orderBy('nama_instansi')->get();
@@ -48,7 +50,7 @@ class SuratMasukController extends Controller
     /**
      * Menyimpan Surat Masuk baru ke database.
      */
-    public function store(SuratMasukRequest $request)
+    public function store(SuratMasukRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $data['diterima_oleh'] = Auth::id();
@@ -73,7 +75,7 @@ class SuratMasukController extends Controller
                 return SuratMasuk::create($data);
             });
         } catch (UniqueConstraintViolationException $e) {
-            // Jika tetap terjadi bentrok jaringan/race condition, paksa re-generate ulang
+            // Jika terjadi race condition, paksa re-generate nomor agenda
             $data['nomor_agenda'] = SuratMasuk::generateNomorAgenda();
             $surat = SuratMasuk::create($data);
         }
@@ -89,7 +91,7 @@ class SuratMasukController extends Controller
     /**
      * Menampilkan detail Surat Masuk beserta Disposisi terikat.
      */
-    public function show(SuratMasuk $suratMasuk)
+    public function show(SuratMasuk $suratMasuk): View
     {
         $suratMasuk->load(['instansi', 'kategori', 'penerima', 'disposisi.dari', 'disposisi.kepada']);
         
@@ -99,7 +101,7 @@ class SuratMasukController extends Controller
     /**
      * Form edit Surat Masuk.
      */
-    public function edit(SuratMasuk $suratMasuk)
+    public function edit(SuratMasuk $suratMasuk): View
     {
         $kategoris = KategoriSurat::orderBy('nama_kategori')->get();
         $instansis = Instansi::orderBy('nama_instansi')->get();
@@ -110,7 +112,7 @@ class SuratMasukController extends Controller
     /**
      * Memperbarui data Surat Masuk.
      */
-    public function update(SuratMasukRequest $request, SuratMasuk $suratMasuk)
+    public function update(SuratMasukRequest $request, SuratMasuk $suratMasuk): RedirectResponse
     {
         $data = $request->validated();
 
@@ -143,7 +145,7 @@ class SuratMasukController extends Controller
     /**
      * Menghapus (Soft Delete) data Surat Masuk.
      */
-    public function destroy(SuratMasuk $suratMasuk)
+    public function destroy(SuratMasuk $suratMasuk): RedirectResponse
     {
         $nomorAgenda = $suratMasuk->nomor_agenda;
         
@@ -157,9 +159,42 @@ class SuratMasukController extends Controller
     }
 
     /**
+     * Mengunggah lampiran berkas / scan dokumen dari halaman Detail Surat Masuk.
+     */
+    public function uploadLampiran(Request $request, SuratMasuk $suratMasuk): RedirectResponse
+    {
+        $request->validate([
+            'lampiran_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        if ($request->hasFile('lampiran_file')) {
+            $oldPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
+            if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $file = $request->file('lampiran_file');
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $originalName);
+            $filename = 'surat_' . time() . '_' . $safeName . '.' . $extension;
+
+            $path = $file->storeAs('lampiran/surat_masuk', $filename, 'public');
+
+            $suratMasuk->update([
+                'lampiran_file' => $path
+            ]);
+
+            ActivityLog::catat('update', 'surat_masuk', "Mengunggah lampiran surat masuk {$suratMasuk->nomor_agenda}");
+        }
+
+        return back()->with('success', 'Lampiran berkas berhasil diunggah.');
+    }
+
+    /**
      * Mencetak label agenda Surat Masuk.
      */
-    public function cetakLabel(SuratMasuk $suratMasuk)
+    public function cetakLabel(SuratMasuk $suratMasuk): View
     {
         $suratMasuk->load(['instansi', 'kategori']);
         
@@ -205,7 +240,7 @@ class SuratMasukController extends Controller
     /**
      * Cetak Lembar Disposisi Surat Masuk.
      */
-    public function cetakDisposisi(SuratMasuk $suratMasuk)
+    public function cetakDisposisi(SuratMasuk $suratMasuk): View
     {
         $suratMasuk->load(['instansi', 'kategori', 'penerima', 'disposisi.dari', 'disposisi.kepada']);
 

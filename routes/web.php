@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
     Route::get('surat-masuk/{suratMasuk}/download', [SuratMasukController::class, 'downloadLampiran'])->name('surat-masuk.download');
     Route::get('surat-masuk/{suratMasuk}/label', [SuratMasukController::class, 'cetakLabel'])->name('surat-masuk.label');
     Route::get('surat-masuk/{suratMasuk}/cetak-disposisi', [SuratMasukController::class, 'cetakDisposisi'])->name('surat-masuk.cetak-disposisi');
+    
+    // Route untuk Handle Upload/Scan Lampiran dari Modal
+    Route::post('surat-masuk/{suratMasuk}/upload-lampiran', [SuratMasukController::class, 'uploadLampiran'])->name('surat-masuk.upload-lampiran');
+
     Route::resource('surat-masuk', SuratMasukController::class);
 
     // --- SURAT KELUAR ---

@@ -3,7 +3,7 @@
 @section('title', 'Detail Surat Masuk')
 
 @section('content')
-<div class="space-y-4 sm:space-y-6">
+<div class="space-y-4 sm:space-y-6" x-data="scanUploadModal()">
 
     <!-- HEADER PAGE & TOMBOL AKSI -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -56,12 +56,12 @@
 
                 @php
                     $badgeClass = match(strtolower($suratMasuk->status ?? '')) {
-                        'baru'           => 'bg-blue-50 text-blue-700 border-blue-200',
-                        'diproses'       => 'bg-amber-50 text-amber-700 border-amber-200',
+                        'baru'          => 'bg-blue-50 text-blue-700 border-blue-200',
+                        'diproses'      => 'bg-amber-50 text-amber-700 border-amber-200',
                         'didisposisikan'=> 'bg-purple-50 text-purple-700 border-purple-200',
-                        'selesai'        => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        'diarsipkan'     => 'bg-slate-100 text-slate-700 border-slate-200',
-                        default          => 'bg-slate-100 text-slate-600 border-slate-200'
+                        'selesai'       => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                        'diarsipkan'    => 'bg-slate-100 text-slate-700 border-slate-200',
+                        default         => 'bg-slate-100 text-slate-600 border-slate-200'
                     };
                 @endphp
                 <span class="self-start inline-block px-3 py-1 rounded-full text-xs font-semibold border shrink-0 {{ $badgeClass }}">
@@ -111,11 +111,18 @@
 
             <!-- Lampiran Berkas Digital & Preview -->
             @php
-                $lampiranPath = $suratMasuk->lampiran ?? $suratMasuk->lampiran_file;
+                $lampiranPath = $suratMasuk->lampiran_file ?? $suratMasuk->lampiran;
             @endphp
 
             <div class="pt-4 border-t border-slate-100 space-y-3">
-                <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Berkas Lampiran (Digital)</dt>
+                <div class="flex items-center justify-between">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Berkas Lampiran (Digital)</dt>
+                    
+                    <button type="button" @click="openModal()" class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition border border-blue-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span>{{ $lampiranPath ? 'Ganti / Upload Berkas' : '+ Upload / Scan Berkas' }}</span>
+                    </button>
+                </div>
                 
                 @if($lampiranPath)
                     @php
@@ -123,6 +130,7 @@
                         $extLower = strtolower($extension);
                         $isImage = in_array($extLower, ['jpg', 'jpeg', 'png', 'webp', 'gif']);
                         $fileUrl = route('surat-masuk.preview', $suratMasuk->id);
+                        $downloadUrl = route('surat-masuk.download', $suratMasuk->id);
                     @endphp
 
                     <div class="flex flex-wrap items-center gap-2">
@@ -133,7 +141,7 @@
                         </a>
 
                         <!-- Download File -->
-                        <a href="{{ $fileUrl }}" download class="inline-flex items-center gap-2 text-xs font-semibold bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-200 transition grow sm:grow-0 justify-center">
+                        <a href="{{ $downloadUrl }}" class="inline-flex items-center gap-2 text-xs font-semibold bg-slate-100 text-slate-700 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-200 transition grow sm:grow-0 justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             <span>Unduh File</span>
                         </a>
@@ -157,7 +165,7 @@
                         @endif
                     </div>
                 @else
-                    <p class="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl border border-slate-100">Tidak ada lampiran berkas digital.</p>
+                    <p class="text-xs text-slate-400 italic bg-slate-50 p-3.5 rounded-xl border border-slate-100">Tidak ada lampiran berkas digital.</p>
                 @endif
             </div>
 
@@ -200,5 +208,164 @@
         </div>
 
     </div>
+
+    <!-- MODAL UPLOAD / SCAN LAMPIRAN -->
+    <div x-show="isModalOpen" 
+         x-transition.opacity 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4" 
+         style="display: none;">
+        
+        <div class="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-5 border border-slate-100" @click.away="closeModal()">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800">Upload / Scan Lampiran</h3>
+                <button type="button" @click="closeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form action="{{ route('surat-masuk.upload-lampiran', $suratMasuk->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                @csrf
+                
+                <!-- Tab Pilihan (File Upload vs Kamera Scan) -->
+                <div class="flex bg-slate-100 p-1 rounded-xl gap-1 text-xs font-semibold">
+                    <button type="button" @click="setMode('file')" :class="mode === 'file' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'" class="flex-1 py-2 rounded-lg transition text-center">
+                        Pilih File
+                    </button>
+                    <button type="button" @click="setMode('camera')" :class="mode === 'camera' ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'" class="flex-1 py-2 rounded-lg transition text-center">
+                        Scan Kamera
+                    </button>
+                </div>
+
+                <!-- Input Hidden untuk File dari Kamera -->
+                <input type="file" name="lampiran_file" x-ref="fileInput" accept=".pdf,.png,.jpg,.jpeg" class="hidden" @change="onFileSelected($event)">
+
+                <!-- Opsi 1: Upload File Normal -->
+                <div x-show="mode === 'file'" class="space-y-3">
+                    <div @click="$refs.fileInput.click()" class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 bg-slate-50 hover:bg-blue-50/50 transition">
+                        <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        <p class="text-xs font-semibold text-slate-700" x-text="fileName ? fileName : 'Klik untuk memilih berkas'"></p>
+                        <p class="text-[10px] text-slate-400 mt-1">Format: PDF, JPG, PNG (Maks 5MB)</p>
+                    </div>
+                </div>
+
+                <!-- Opsi 2: WebRTC Camera Scan -->
+                <div x-show="mode === 'camera'" class="space-y-3">
+                    <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+                        <video x-ref="video" autoplay playsinline class="w-full h-full object-cover" x-show="!capturedImage"></video>
+                        <img :src="capturedImage" x-show="capturedImage" class="w-full h-full object-contain">
+                    </div>
+
+                    <div class="flex gap-2">
+                        <template x-if="!capturedImage">
+                            <button type="button" @click="takePhoto()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                Tangkap Foto
+                            </button>
+                        </template>
+                        <template x-if="capturedImage">
+                            <button type="button" @click="retakePhoto()" class="w-full py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-semibold transition">
+                                Ambil Ulang Foto
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Footer Tombol Modal -->
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="closeModal()" class="px-4 py-2 text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition shadow-sm">
+                        Simpan Berkas
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    function scanUploadModal() {
+        return {
+            isModalOpen: false,
+            mode: 'file', // 'file' atau 'camera'
+            fileName: '',
+            capturedImage: null,
+            stream: null,
+
+            openModal() {
+                this.isModalOpen = true;
+            },
+
+            closeModal() {
+                this.stopCamera();
+                this.isModalOpen = false;
+                this.fileName = '';
+                this.capturedImage = null;
+            },
+
+            setMode(mode) {
+                this.mode = mode;
+                if (mode === 'camera') {
+                    this.startCamera();
+                } else {
+                    this.stopCamera();
+                }
+            },
+
+            startCamera() {
+                this.capturedImage = null;
+                this.$nextTick(() => {
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                        .then(stream => {
+                            this.stream = stream;
+                            this.$refs.video.srcObject = stream;
+                        })
+                        .catch(err => {
+                            alert('Gagal mengakses kamera: ' + err.message);
+                        });
+                });
+            },
+
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+            },
+
+            takePhoto() {
+                const canvas = document.createElement('canvas');
+                canvas.width = this.$refs.video.videoWidth;
+                canvas.height = this.$refs.video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(this.$refs.video, 0, 0);
+
+                this.capturedImage = canvas.toDataURL('image/jpeg');
+
+                canvas.toBlob(blob => {
+                    const file = new File([blob], 'scan_surat_' + Date.now() + '.jpg', { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    this.$refs.fileInput.files = dataTransfer.files;
+                    this.fileName = file.name;
+                }, 'image/jpeg');
+
+                this.stopCamera();
+            },
+
+            retakePhoto() {
+                this.capturedImage = null;
+                this.startCamera();
+            },
+
+            onFileSelected(event) {
+                if (event.target.files.length > 0) {
+                    this.fileName = event.target.files[0].name;
+                }
+            }
+        }
+    }
+</script>
 @endsection

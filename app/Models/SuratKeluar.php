@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder;
 
 class SuratKeluar extends Model
 {
@@ -54,16 +55,18 @@ class SuratKeluar extends Model
         return sprintf('%03d/%s/%s/%d', $urutan, $kodeKategori, $bulanRomawi, $tahun);
     }
 
-    public function scopeFilter($query, array $filters)
+    public function scopeFilter(Builder $query, array $filters): Builder
     {
         return $query
-            ->when($filters['search'] ?? null, fn ($q, $v) => $q->where(function ($q2) use ($v) {
-                $q2->where('perihal', 'like', "%{$v}%")->orWhere('nomor_surat', 'like', "%{$v}%");
+            ->when($filters['search'] ?? null, fn (Builder $q, string $v) => $q->where(function (Builder $q2) use ($v) {
+                $q2->where('perihal', 'like', "%{$v}%")
+                    ->orWhere('nomor_surat', 'like', "%{$v}%")
+                    ->orWhere('nomor_agenda', 'like', "%{$v}%");
             }))
-            ->when($filters['kategori_id'] ?? null, fn ($q, $v) => $q->where('kategori_surat_id', $v))
-            ->when($filters['instansi_id'] ?? null, fn ($q, $v) => $q->where('instansi_id', $v))
-            ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
-            ->when($filters['dari_tanggal'] ?? null, fn ($q, $v) => $q->whereDate('tanggal_surat', '>=', $v))
-            ->when($filters['sampai_tanggal'] ?? null, fn ($q, $v) => $q->whereDate('tanggal_surat', '<=', $v));
+            ->when($filters['kategori_id'] ?? null, fn (Builder $q, $v) => $q->where('kategori_surat_id', $v))
+            ->when($filters['instansi_id'] ?? null, fn (Builder $q, $v) => $q->where('instansi_id', $v))
+            ->when($filters['status'] ?? null, fn (Builder $q, $v) => $q->where('status', $v))
+            ->when($filters['dari_tanggal'] ?? null, fn (Builder $q, $v) => $q->whereDate('tanggal_terima', '>=', $v))
+            ->when($filters['sampai_tanggal'] ?? null, fn (Builder $q, $v) => $q->whereDate('tanggal_terima', '<=', $v));
     }
 }
