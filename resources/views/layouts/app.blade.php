@@ -71,19 +71,74 @@
                     </div>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links Lengkap -->
                 <nav class="p-4 space-y-1 text-xs font-semibold">
-                    <a href="{{ route('dashboard') ?? '#' }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
-                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    
+                    <!-- Dashboard -->
+                    <a href="{{ Route::has('dashboard') ? route('dashboard') : '#' }}" 
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                        <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         <span>Dashboard</span>
                     </a>
 
                     <div class="pt-4 pb-1 px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Modul Surat</div>
 
-                    <a href="{{ route('surat-masuk.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/20 font-bold transition">
-                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                        <span>Surat Masuk</span>
-                    </a>
+                    <!-- Surat Masuk -->
+                    @if(Route::has('surat-masuk.index'))
+                        <a href="{{ route('surat-masuk.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('surat-masuk.*') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                            <span>Surat Masuk</span>
+                        </a>
+                    @endif
+
+                    <!-- Surat Keluar -->
+                    @if(Route::has('surat-keluar.index'))
+                        <a href="{{ route('surat-keluar.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('surat-keluar.*') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span>Surat Keluar</span>
+                        </a>
+                    @endif
+
+                    <!-- Disposisi -->
+                    @if(Route::has('disposisi.index'))
+                        <a href="{{ route('disposisi.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('disposisi.*') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                            <span>Disposisi</span>
+                        </a>
+                    @endif
+
+                    <div class="pt-4 pb-1 px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Master Data</div>
+
+                    <!-- Kategori Surat -->
+                    @if(Route::has('kategori.index'))
+                        <a href="{{ route('kategori.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('kategori.*') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 11h.01M7 15h.01M11 7h8M11 11h8M11 15h8"/></svg>
+                            <span>Kategori Surat</span>
+                        </a>
+                    @endif
+
+                    <!-- Instansi / Pengirim -->
+                    @if(Route::has('instansi.index'))
+                        <a href="{{ route('instansi.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('instansi.*') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            <span>Instansi / Pengirim</span>
+                        </a>
+                    @endif
+
+                    <!-- Pengguna / User -->
+                    @if(Route::has('users.index'))
+                        <a href="{{ route('users.index') }}" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition {{ request()->routeIs('users.*') ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 hover:text-white' }}">
+                            <svg class="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            <span>Manajemen Pengguna</span>
+                        </a>
+                    @endif
+
                 </nav>
             </div>
 
@@ -116,19 +171,21 @@
 
                 <!-- Right Nav Items -->
                 <div class="flex items-center gap-3">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-xs font-semibold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
-                            Keluar
-                        </button>
-                    </form>
+                    @if(Route::has('logout'))
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="text-xs font-semibold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition">
+                                Keluar
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </header>
 
             <!-- Main Content Area -->
             <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 
-                <!-- Single Flash Message dengan Timer Auto-Dismiss 3 Detik -->
+                <!-- Flash Message dengan Auto-Dismiss 3 Detik -->
                 @if (session('success'))
                     <div x-data="{ show: true }" 
                          x-show="show" 
@@ -156,7 +213,7 @@
         </div>
     </div>
 
-    <!-- Alpine.js untuk penanganan interaksi UI & Timer Notifikasi -->
+    <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
